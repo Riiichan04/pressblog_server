@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Verification</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f9fafb; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+       style="background-color: #f9fafb; padding: 40px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0"
+                   style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                <tr>
+                    <td style="background-color: #111827; padding: 30px; text-align: center;">
+                        <h1 style="color: #10b981; margin: 0; font-size: 24px; letter-spacing: -0.5px; font-weight: bold;">
+                            PRESS<span style="color: #ffffff;">BLOG</span>
+                        </h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 40px; color: #374151; line-height: 1.6;">
+                        <h2 style="color: #111827; font-size: 22px; margin-top: 0; font-weight: 700;">Verify your
+                            identity</h2>
+                        <p style="margin-bottom: 20px;">Hi there,</p>
+                        <p style="margin-bottom: 20px;">We received a request to access your account for <span
+                                th:text="${email}" style="color: #10b981; font-weight: 600;">user@example.com</span>.
+                            Please use the verification code below to complete the process:</p>
+
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                               style="background-color: #f3f4f6; border-radius: 8px; border: 1px dashed #d1d5db; margin: 30px 0;">
+                            <tr>
+                                <td style="padding: 20px; text-align: center;">
+                                    <p th:text="${otp}"
+                                       style="font-size: 36px; font-weight: 700; letter-spacing: 10px; color: #111827; margin: 0;">
+                                        000000</p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin-bottom: 20px;">This code will expire in <span th:text="${expireTime}"
+                                                                                       style="color: #10b981; font-weight: 600;">5</span>
+                            <span style="color: #10b981; font-weight: 600;">minutes</span>. For your security, do not
+                            share this code with anyone.</p>
+                        <p style="margin-bottom: 30px;">If you didn't request this, you can safely ignore this
+                            email.</p>
+
+                        <p style="margin-bottom: 0;">Best regards,<br><strong>The PressBlog Team</strong></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 20px; text-align: center; font-size: 12px; color: #9ca3af; background-color: #f9fafb;">
+                        <p style="margin: 0;">&copy; 2026 PressBlog Platform. All rights reserved.</p>
+                        <p style="margin: 5px 0 0 0;">This is an automated message, please do not reply to this
+                            email.</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
