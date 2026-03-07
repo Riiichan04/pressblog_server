@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import vn.id.devblog.blog_server.common.enums.PostLanguage;
 import vn.id.devblog.blog_server.common.enums.PostStatus;
 
 import java.time.LocalDateTime;
@@ -47,10 +48,14 @@ public class Post extends BaseEntity {
     )
     private Set<Tag> tags = new HashSet<>();
 
+    @Enumerated(EnumType.STRING)
+    private PostLanguage language;
+
     private PostStatus status;
     private int viewCount;
     private boolean isDeleted;
-
+    private boolean isFeatured;
+    
     @Override
     public void onCreate() {
         this.status = PostStatus.DRAFT;

@@ -49,6 +49,7 @@ public class PostService {
             post.setThumbnail(request.thumbnail());
             post.setAuthor(userRepository.findByEmail(request.email()));
             post.setCategory(categoryRepository.findByName(request.categoryName()));
+            post.setLanguage(request.language());
             Set<Tag> tags = this.extractTags(request.listTag());
             post.setTags(tags);
             postRepository.save(post);
@@ -119,7 +120,9 @@ public class PostService {
                         post.getCategory().getName(),
                         post.getTags().stream().map(Tag::getName).collect(Collectors.toSet()),
                         post.getStatus(),
-                        post.getViewCount()
+                        post.getViewCount(),
+                        post.getUpdatedAt(),
+                        post.getLanguage()
                 )
         );
     }
