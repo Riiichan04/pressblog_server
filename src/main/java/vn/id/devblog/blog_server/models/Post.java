@@ -28,6 +28,9 @@ public class Post extends BaseEntity {
     @Column(unique = true)
     private String slug;
 
+    @Column(columnDefinition = "TEXT")
+    private String excerpt;
+
     @Column(columnDefinition = "MEDIUMTEXT")
     private String content;
 
