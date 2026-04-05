@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.id.devblog.blog_server.common.utilities.HtmlCleaner;
 import vn.id.devblog.blog_server.common.utilities.SlugUtils;
 import vn.id.devblog.blog_server.dto.request.post.PostRequest;
 import vn.id.devblog.blog_server.dto.response.post.GetPostResponse;
@@ -44,7 +45,7 @@ public class PostService {
         if (validatePostRequest(request)) {
             Post post = new Post();
             post.setName(request.name());
-            post.setContent(request.content());
+            post.setContent(HtmlCleaner.cleanHtml(request.content()));
             post.setSlug(SlugUtils.toSlug(request.name()));
             post.setThumbnail(request.thumbnail());
             post.setAuthor(userRepository.findByEmail(request.email()));
@@ -65,7 +66,7 @@ public class PostService {
         }
 
         post.setName(request.name());
-        post.setContent(request.content());
+        post.setContent(HtmlCleaner.cleanHtml(request.content()));
         post.setThumbnail(request.thumbnail());
 
         //Update slug
