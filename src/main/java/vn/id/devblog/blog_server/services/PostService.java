@@ -1,5 +1,7 @@
 package vn.id.devblog.blog_server.services;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,7 +22,11 @@ import vn.id.devblog.blog_server.repositories.PostRepository;
 import vn.id.devblog.blog_server.repositories.TagRepository;
 import vn.id.devblog.blog_server.repositories.UserRepository;
 
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,14 +37,19 @@ public class PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
+    private final Cloudinary cloudinary;
 
     @Autowired
-    public PostService(UserRepository userRepository, PostRepository postRepository, CategoryRepository categoryRepository, TagRepository tagRepository) {
+    public PostService(UserRepository userRepository, PostRepository postRepository,
+                       CategoryRepository categoryRepository, TagRepository tagRepository,
+                       Cloudinary cloudinary) {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
         this.categoryRepository = categoryRepository;
         this.tagRepository = tagRepository;
+        this.cloudinary = cloudinary;
     }
+
 
     @Transactional
     public PostResponse insertNewPost(PostRequest request) {
@@ -54,6 +65,9 @@ public class PostService {
             Set<Tag> tags = this.extractTags(request.listTag());
             post.setTags(tags);
             postRepository.save(post);
+
+            verifyImages(request.content(), request.thumbnail());
+
             return new PostResponse(true, "Add new post successfully");
         } else return new PostResponse(false, "Failed to add new post");
     }
@@ -81,6 +95,9 @@ public class PostService {
         this.extractTags(request.listTag()).forEach(tag -> post.getTags().add(tag));
 
         postRepository.save(post);
+
+        verifyImages(request.content(), request.thumbnail());
+
         return new PostResponse(true, "Update post successfully");
     }
 
@@ -126,5 +143,45 @@ public class PostService {
                         post.getLanguage()
                 )
         );
+    }
+
+    private String extractPublicId(String url) {
+        if (url == null || !url.contains("cloudinary")) return null;
+        try {
+            String[] parts = url.split("/");
+            String lastPart = parts[parts.length - 1];
+            //Get folder and file name
+            return lastPart.split("\\.")[0];
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void verifyImages(String content, String thumbnail) {
+        Set<String> publicIds = new HashSet<>();
+
+        // Find attachment by regex
+        Pattern pattern = Pattern.compile("https://res.cloudinary.com/[^\\s\"')]+");
+        Matcher matcher = pattern.matcher(content);
+        while (matcher.find()) {
+            String id = extractPublicId(matcher.group());
+            if (id != null) publicIds.add(id);
+        }
+
+        // Extract from thumbnail
+        String thumbId = extractPublicId(thumbnail);
+        if (thumbId != null) publicIds.add(thumbId);
+
+        // Update tag in Cloudinary
+        if (!publicIds.isEmpty()) {
+            try {
+                cloudinary.uploader().addTag("pressblog_verified",
+                        publicIds.toArray(new String[0]), ObjectUtils.emptyMap());
+                cloudinary.uploader().removeTag("pressblog_unverified",
+                        publicIds.toArray(new String[0]), ObjectUtils.emptyMap());
+            } catch (IOException e) {
+                log.error("Failed to verify Cloudinary images: {}", e.getMessage());
+            }
+        }
     }
 }

@@ -25,7 +25,7 @@ public class UploadController {
     public ResponseEntity<String> getUploadUrl(
             @RequestParam("folder") String folderName,
             @RequestParam("fileName") String fileName,
-            @RequestParam("contentType") String contentType //FIXME: Handle content type
+            @RequestParam(value = "contentType", required = false) String contentType //FIXME: Handle content type
     ) {
         JsonObject result = new JsonObject();
         try {
