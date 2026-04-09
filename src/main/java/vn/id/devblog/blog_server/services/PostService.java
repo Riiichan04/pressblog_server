@@ -14,6 +14,7 @@ import vn.id.devblog.blog_server.common.utilities.HtmlCleaner;
 import vn.id.devblog.blog_server.common.utilities.SlugUtils;
 import vn.id.devblog.blog_server.dto.request.post.PostRequest;
 import vn.id.devblog.blog_server.dto.response.post.GetPostResponse;
+import vn.id.devblog.blog_server.dto.response.post.PostAuthor;
 import vn.id.devblog.blog_server.dto.response.post.PostResponse;
 import vn.id.devblog.blog_server.models.Post;
 import vn.id.devblog.blog_server.models.Tag;
@@ -119,7 +120,6 @@ public class PostService {
     }
 
     public GetPostResponse getPostBySlug(String slug) {
-        System.out.println(slug);
         Post post = postRepository.findBySlug(slug).orElse(null);
         if (post == null) return null;
         return mapPostToGetPostResponse(post);
@@ -141,10 +141,19 @@ public class PostService {
     }
 
     private static GetPostResponse mapPostToGetPostResponse(Post post) {
+        PostAuthor author = new PostAuthor(
+                post.getAuthor().getId(),
+                post.getAuthor().getEmail(),
+                post.getAuthor().getDisplayName(),
+                post.getAuthor().getUsername(),
+                post.getAuthor().getAvatar(),
+                post.getAuthor().getDescription()
+        );
+
         return new GetPostResponse(
                 post.getId(), post.getName(),
                 post.getSlug(), post.getContent(),
-                post.getThumbnail(), post.getAuthor().getId(),
+                post.getThumbnail(), author,
                 post.getCategory().getName(),
                 post.getTags().stream().map(Tag::getName).collect(Collectors.toSet()),
                 post.getStatus(),

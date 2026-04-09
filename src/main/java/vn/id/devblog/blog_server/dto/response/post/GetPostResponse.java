@@ -12,7 +12,7 @@ public record GetPostResponse(
         String slug,
         String content,
         String thumbnail,
-        Long authorId,
+        PostAuthor author,
         String categoryName,
         Set<String> tagNames,
         PostStatus status,
@@ -21,3 +21,4 @@ public record GetPostResponse(
         PostLanguage language
 ) {
 }
+
