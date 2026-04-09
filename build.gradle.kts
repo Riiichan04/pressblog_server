@@ -31,7 +31,9 @@ dependencies {
     // api(libs.jakarta.servlet.jsp.jstl.jakarta.servlet.jsp.jstl.api)
     // compileOnly(libs.jakarta.servlet.jakarta.servlet.api)
 
-    api(libs.mysql.mysql.connector.java)
+//    api(libs.mysql.mysql.connector.java)
+    runtimeOnly(libs.postgresql)
+
     api(libs.org.jdbi.jdbi3.core)
     api(libs.org.jdbi.jdbi3.sqlobject)
 

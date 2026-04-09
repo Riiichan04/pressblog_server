@@ -31,7 +31,7 @@ public class Post extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String excerpt;
 
-    @Column(columnDefinition = "MEDIUMTEXT")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @Column(length = 1024)
