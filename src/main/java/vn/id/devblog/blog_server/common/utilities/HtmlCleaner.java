@@ -5,6 +5,6 @@ import org.jsoup.safety.Safelist;
 
 public class HtmlCleaner {
     public static String cleanHtml(String html) {
-        return Jsoup.clean(html, Safelist.basic());
+        return Jsoup.clean(html, Safelist.relaxed());
     }
 }

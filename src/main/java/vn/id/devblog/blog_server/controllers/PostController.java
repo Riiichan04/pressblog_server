@@ -46,4 +46,13 @@ public class PostController {
         Page<GetPostResponse> response = postService.getPostByUser(id, page, size);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<GetPostResponse> getPostBySlug(
+            @PathVariable String slug,
+            @RequestParam(value = "lang", defaultValue = "vi") String lang
+    ) {
+        GetPostResponse response = postService.getPostBySlug(slug);
+        return ResponseEntity.ok(response);
+    }
 }

@@ -1,5 +1,6 @@
 package vn.id.devblog.blog_server.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public class Category extends BaseEntity {
     @Column(unique = true)
     private String slug;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "category")
+    @JsonIgnore
     private List<Post> posts = new ArrayList<>();
 }

@@ -118,6 +118,13 @@ public class PostService {
         return this.mapToResponse(listPost);
     }
 
+    public GetPostResponse getPostBySlug(String slug) {
+        System.out.println(slug);
+        Post post = postRepository.findBySlug(slug).orElse(null);
+        if (post == null) return null;
+        return mapPostToGetPostResponse(post);
+    }
+
     private boolean validatePostRequest(PostRequest request) {
         return userRepository.findByEmail(request.email()) != null && request.content().length() <= DEFAULT_POST_LENGTH;
     }
@@ -130,18 +137,19 @@ public class PostService {
     }
 
     private Page<GetPostResponse> mapToResponse(Page<Post> posts) {
-        return posts.map(post ->
-                new GetPostResponse(
-                        post.getId(), post.getName(),
-                        post.getSlug(), post.getContent(),
-                        post.getThumbnail(), post.getAuthor().getId(),
-                        post.getCategory().getName(),
-                        post.getTags().stream().map(Tag::getName).collect(Collectors.toSet()),
-                        post.getStatus(),
-                        post.getViewCount(),
-                        post.getUpdatedAt(),
-                        post.getLanguage()
-                )
+        return posts.map(PostService::mapPostToGetPostResponse);
+    }
+
+    private static GetPostResponse mapPostToGetPostResponse(Post post) {
+        return new GetPostResponse(
+                post.getId(), post.getName(),
+                post.getSlug(), post.getContent(),
+                post.getThumbnail(), post.getAuthor().getId(),
+                post.getCategory().getName(),
+                post.getTags().stream().map(Tag::getName).collect(Collectors.toSet()),
+                post.getStatus(),
+                post.getViewCount(),
+                post.getUpdatedAt(), post.getLanguage()
         );
     }
 
