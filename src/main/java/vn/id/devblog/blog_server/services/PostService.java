@@ -61,8 +61,9 @@ public class PostService {
             post.setSlug(SlugUtils.toSlug(request.name()));
             post.setThumbnail(request.thumbnail());
             post.setAuthor(userRepository.findByEmail(request.email()));
-            post.setCategory(categoryRepository.findByName(request.categoryName()));
+            post.setCategory(categoryRepository.findBySlug(request.categoryName()));
             post.setLanguage(request.language());
+            post.setExcerpt(request.excerpt());
             Set<Tag> tags = this.extractTags(request.listTag());
             post.setTags(tags);
             postRepository.save(post);
@@ -130,9 +131,16 @@ public class PostService {
     }
 
     private Set<Tag> extractTags(Set<String> rawTags) {
+        if (rawTags == null) return new HashSet<>();
         return rawTags.stream()
-                .map(tagRepository::findByName)
-                .filter(java.util.Objects::nonNull)
+                .map(tagName -> {
+                    Tag existingTag = tagRepository.findByName(tagName);
+                    if (existingTag != null) return existingTag;
+
+                    Tag newTag = new Tag();
+                    newTag.setName(tagName);
+                    return tagRepository.save(newTag);
+                })
                 .collect(Collectors.toSet());
     }
 
