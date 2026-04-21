@@ -16,4 +16,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Post findByNameAndAuthor(String name, User author);
     Optional<Post> findBySlug(String slug);
     Page<Post> findByAuthorId(Long authorId, Pageable pageable);
+    Optional<Post> findByIsFeaturedTrue();
+    List<Post> findTop5ByIsFeaturedFalseOrderByCreatedAtDesc();
 }

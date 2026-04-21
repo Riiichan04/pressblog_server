@@ -25,6 +25,7 @@ import vn.id.devblog.blog_server.repositories.UserRepository;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -126,6 +127,14 @@ public class PostService {
         return mapPostToGetPostResponse(post);
     }
 
+    public GetPostResponse getFeaturedPost() {
+        return mapPostToGetPostResponse(postRepository.findByIsFeaturedTrue().orElse(null));
+    }
+
+    public List<GetPostResponse> getNewestPost() {
+        return postRepository.findTop5ByIsFeaturedFalseOrderByCreatedAtDesc().stream().map(PostService::mapPostToGetPostResponse).collect(Collectors.toList());
+    }
+
     private boolean validatePostRequest(PostRequest request) {
         return userRepository.findByEmail(request.email()) != null && request.content().length() <= DEFAULT_POST_LENGTH;
     }
@@ -149,6 +158,7 @@ public class PostService {
     }
 
     private static GetPostResponse mapPostToGetPostResponse(Post post) {
+        if (post == null) return null;
         PostAuthor author = new PostAuthor(
                 post.getAuthor().getId(),
                 post.getAuthor().getEmail(),
