@@ -41,15 +41,18 @@ public class PostService {
     private final TagRepository tagRepository;
     private final Cloudinary cloudinary;
 
+    private final PostViewService postViewService;
+
     @Autowired
     public PostService(UserRepository userRepository, PostRepository postRepository,
                        CategoryRepository categoryRepository, TagRepository tagRepository,
-                       Cloudinary cloudinary) {
+                       Cloudinary cloudinary, PostViewService postViewService) {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
         this.categoryRepository = categoryRepository;
         this.tagRepository = tagRepository;
         this.cloudinary = cloudinary;
+        this.postViewService = postViewService;
     }
 
 
@@ -124,7 +127,22 @@ public class PostService {
     public GetPostResponse getPostBySlug(String slug) {
         Post post = postRepository.findBySlug(slug).orElse(null);
         if (post == null) return null;
-        return mapPostToGetPostResponse(post);
+        GetPostResponse rawResponse = mapPostToGetPostResponse(post);
+        //Map with redis view count
+        return new GetPostResponse(
+                rawResponse.id(),
+                rawResponse.name(),
+                rawResponse.slug(),
+                rawResponse.content(),
+                rawResponse.thumbnail(),
+                rawResponse.author(),
+                rawResponse.categoryName(),
+                rawResponse.tagNames(),
+                rawResponse.status(),
+                postViewService.getViewCount(slug),
+                rawResponse.updatedAt(),
+                rawResponse.language()
+        );
     }
 
     public GetPostResponse getFeaturedPost() {

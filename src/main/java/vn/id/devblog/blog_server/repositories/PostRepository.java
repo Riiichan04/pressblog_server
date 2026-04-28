@@ -3,7 +3,11 @@ package vn.id.devblog.blog_server.repositories;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import vn.id.devblog.blog_server.models.Post;
 import vn.id.devblog.blog_server.models.User;
 
@@ -18,4 +22,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByAuthorId(Long authorId, Pageable pageable);
     Optional<Post> findByIsFeaturedTrue();
     List<Post> findTop5ByIsFeaturedFalseOrderByCreatedAtDesc();
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Post p SET p.viewCount = :views WHERE p.slug = :slug")
+    void updateViewCount(@Param("slug") String slug, @Param("views") long views);
+
+    @Query("select viewCount from Post where slug = :slug")
+    int findViewCountBySlug(String slug);
 }

@@ -1,5 +1,6 @@
 package vn.id.devblog.blog_server.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -8,15 +9,18 @@ import vn.id.devblog.blog_server.dto.request.post.PostRequest;
 import vn.id.devblog.blog_server.dto.response.post.GetPostResponse;
 import vn.id.devblog.blog_server.dto.response.post.PostResponse;
 import vn.id.devblog.blog_server.services.PostService;
+import vn.id.devblog.blog_server.services.PostViewService;
 
 @RestController
 @RequestMapping("/post")
 public class PostController {
     private PostService postService;
+    private PostViewService postViewService;
 
     @Autowired
-    public PostController(PostService postService) {
+    public PostController(PostService postService, PostViewService postViewService) {
         this.postService = postService;
+        this.postViewService = postViewService;
     }
 
     @PostMapping("/upload")
@@ -50,9 +54,12 @@ public class PostController {
     @GetMapping("/slug/{slug}")
     public ResponseEntity<GetPostResponse> getPostBySlug(
             @PathVariable String slug,
-            @RequestParam(value = "lang", defaultValue = "vi") String lang
+            @RequestParam(value = "lang", defaultValue = "vi") String lang,
+            HttpServletRequest request
     ) {
+        String ip = request.getRemoteAddr();
         GetPostResponse response = postService.getPostBySlug(slug);
+        postViewService.incrementView(slug, ip);
         return ResponseEntity.ok(response);
     }
 }
