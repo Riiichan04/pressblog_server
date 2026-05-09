@@ -55,7 +55,7 @@ public class Post extends BaseEntity {
     private PostLanguage language;
 
     private PostStatus status;
-    private int viewCount;
+    private long viewCount;
     private boolean isDeleted;
     private boolean isFeatured;
     

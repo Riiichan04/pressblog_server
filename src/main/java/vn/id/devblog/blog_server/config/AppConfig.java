@@ -19,8 +19,9 @@ public class AppConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor)
                 //API need token
-                .addPathPatterns("/post/**")
-                .addPathPatterns("/upload/**");
+                .addPathPatterns("/api/v1/post/**")
+                .addPathPatterns("/api/v1/upload/**")
+                .addPathPatterns("/api/v1/dashboard/**");
 
     }
 }

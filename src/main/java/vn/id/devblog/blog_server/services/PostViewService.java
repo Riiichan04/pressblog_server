@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import vn.id.devblog.blog_server.models.Post;
 import vn.id.devblog.blog_server.repositories.PostRepository;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Service
@@ -24,6 +26,9 @@ public class PostViewService {
     }
 
     public void incrementView(String slug, String userIp) {
+        Post post = postRepository.findBySlug(slug).orElse(null);
+        if (post == null) return;
+
         String viewKey = VIEW_KEY_PREFIX + slug;
         String lockKey = LOCK_KEY_PREFIX + slug + ":" + userIp;
 
@@ -38,10 +43,16 @@ public class PostViewService {
 
         if (Boolean.TRUE.equals(isFirstView)) {
             redisTemplate.opsForValue().increment(VIEW_KEY_PREFIX + slug);
+
+            //Add view to calculate trending
+            Long authorId = post.getAuthor().getId();
+            String today = LocalDateTime.now().toString();
+            String userDailyKey = "user:" + authorId + ":views:" + today;
+            redisTemplate.opsForValue().increment(userDailyKey);
         }
     }
 
-    public int getViewCount(String slug) {
+    public long getViewCount(String slug) {
         String viewKey = VIEW_KEY_PREFIX + slug;
         String val = redisTemplate.opsForValue().get(viewKey);
 
@@ -49,7 +60,7 @@ public class PostViewService {
             return Integer.parseInt(val);
         }
         //If redis dont have data, get from db and update to redis
-        int finalViews = postRepository.findViewCountBySlug(slug);
+        long finalViews = postRepository.findViewCountBySlug(slug);
         redisTemplate.opsForValue().setIfAbsent(viewKey, String.valueOf(finalViews));
 
         return finalViews;

@@ -23,11 +23,19 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findByIsFeaturedTrue();
     List<Post> findTop5ByIsFeaturedFalseOrderByCreatedAtDesc();
 
+    long countByAuthorId(Long authorId);
+    long countViewCountByAuthorId(Long authorId);
+
     @Modifying
     @Transactional
     @Query("UPDATE Post p SET p.viewCount = :views WHERE p.slug = :slug")
     void updateViewCount(@Param("slug") String slug, @Param("views") long views);
 
+    @Query("SELECT SUM(p.viewCount) FROM Post p WHERE p.author.id = :authorId")
+    Long sumViewsByAuthorId(@Param("authorId") Long authorId);
+
     @Query("select viewCount from Post where slug = :slug")
-    int findViewCountBySlug(String slug);
+    long findViewCountBySlug(String slug);
+
+    List<Post> findTop5ByViewCountOrderByIdDesc(long viewCount);
 }

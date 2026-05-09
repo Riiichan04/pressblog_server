@@ -16,7 +16,7 @@ public record GetPostResponse(
         String categoryName,
         Set<String> tagNames,
         PostStatus status,
-        int viewCount,
+        long viewCount,
         LocalDateTime updatedAt,
         PostLanguage language
 ) {
