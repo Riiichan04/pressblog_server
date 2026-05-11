@@ -7,12 +7,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import java.util.UUID;
-
 @Component
 public class JwtHttpInterceptor implements HandlerInterceptor {
-    private JwtConfig jwtConfig;
+    private final JwtConfig jwtConfig;
 
+    public JwtHttpInterceptor(JwtConfig jwtConfig) {
+        this.jwtConfig = jwtConfig;
+    }
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
         if (HttpMethod.OPTIONS.matches(request.getMethod())) {

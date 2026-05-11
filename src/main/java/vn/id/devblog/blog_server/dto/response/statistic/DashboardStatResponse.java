@@ -13,6 +13,13 @@ public record DashboardStatResponse(
         List<TrendingPostDto> trendingPosts
 ) {
     public record DailyViewStat(long view, LocalDateTime date) {
+        @Override
+        public String toString() {
+            return "DailyViewStat{" +
+                    "view=" + view +
+                    ", date=" + date +
+                    '}';
+        }
     }
     public record TrendingPostDto(
             Long id,
@@ -21,5 +28,28 @@ public record DashboardStatResponse(
             long views,
             long comments,
             LocalDateTime createdAt
-    ) {}
+    ) {
+        @Override
+        public String toString() {
+            return "TrendingPostDto{" +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    ", status=" + status +
+                    ", views=" + views +
+                    ", comments=" + comments +
+                    ", createdAt=" + createdAt +
+                    '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "DashboardStatResponse{" +
+                "totalPosts=" + totalPosts +
+                ", totalViews=" + totalViews +
+                ", totalComments=" + totalComments +
+                ", viewTrends=" + viewTrends +
+                ", trendingPosts=" + trendingPosts +
+                '}';
+    }
 }

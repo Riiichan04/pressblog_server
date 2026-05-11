@@ -39,13 +39,13 @@ public class JwtConfig {
         }
     }
     public Long extractUserId(String token) {
-        String rawUserId = Jwts.parserBuilder()
+        Integer rawUserId = Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .get("userId", String.class);
-        return Long.parseLong(rawUserId);
+                .get("userId", Integer.class);
+        return rawUserId.longValue();
     }
 
     public Claims extractAllClaims(String token) {
