@@ -29,11 +29,11 @@ public class UserDashboardController {
             long extractedUserId = Long.parseLong(userId);
             long posts = postRepository.countByAuthorId(extractedUserId);
             long views = postRepository.sumViewsByAuthorId(extractedUserId);
-            long comments = 0; //TODO: Add count comment
+            long comments = 0;
             List<DailyViewStat> weekTrending = userDashboardService.getWeeklyTrends(extractedUserId);
             List<TrendingPostDto> trendingPost = userDashboardService.getTopTrendingPosts(extractedUserId);
 
-            return ResponseEntity.ok(new DashboardStatResponse(posts, views, 0, weekTrending, trendingPost));
+            return ResponseEntity.ok(new DashboardStatResponse(posts, views, comments, weekTrending, trendingPost));
         }
         catch (Exception e) {
             log.error(e.getMessage());
