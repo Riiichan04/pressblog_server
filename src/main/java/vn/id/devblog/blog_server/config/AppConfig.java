@@ -23,6 +23,7 @@ public class AppConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/v1/upload/**")
                 .addPathPatterns("/api/v1/user/dashboard/**")
                 .addPathPatterns("/api/v1/user/profile/**")
+                .addPathPatterns("/api/v1/user/update/password")
                 //API dont need token
                 .excludePathPatterns("/api/v1/post/metadata/**")
                 .excludePathPatterns("/api/v1/post/get/**")
