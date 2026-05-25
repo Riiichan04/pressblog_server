@@ -41,16 +41,24 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest input) {
-        User existUser = this.userRepository.findByEmail(input.email());
-        if (existUser != null) {
-            return new AuthResponse(false, "Account already exists", null);
+        User existEmail = this.userRepository.findByEmail(input.email());
+        if (existEmail != null) {
+            return new AuthResponse(false, "email_exists", null);
         }
+
+        String normalizedUsername = input.username().toLowerCase();
+        User existUsername = this.userRepository.findByUsername(normalizedUsername);
+        if (existUsername != null) {
+            return new AuthResponse(false, "username_exists", null);
+        }
+
         User newUser = new User();
         newUser.setEmail(input.email());
-        newUser.setUsername(input.username());
+        newUser.setUsername(normalizedUsername);
         newUser.setPassword(PasswordEncryption.hashPassword(input.password()));
         this.userRepository.save(newUser);
-        return new AuthResponse(true, "Register success!", null);
+
+        return new AuthResponse(true, "register_success", null);
     }
 
     private static AuthDto getAuthDto(User targetUser, String jwtToken) {
