@@ -1,6 +1,7 @@
 package vn.id.devblog.blog_server.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,7 @@ public class User extends BaseEntity {
     private String email;
 
     @Column(nullable = false, length = 64, unique = true)
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Invalid username format")
     private String username;
 
     @Column(length = 255)

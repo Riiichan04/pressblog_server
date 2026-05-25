@@ -57,6 +57,7 @@ dependencies {
     implementation (libs.cloudinary.http5)
 
     api(libs.spring.boot.starter.mail)
+    implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.boot.starter.thymeleaf)
     implementation(libs.springboot.starter)
     implementation(libs.spring.boot.starter.data.jpa)
