@@ -17,17 +17,19 @@ import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-    Post findByName(String name);
-    Post findByNameAndAuthor(String name, User author);
     Optional<Post> findBySlug(String slug);
     Page<Post> findByAuthorId(Long authorId, Pageable pageable);
     Optional<Post> findByIsFeaturedTrue();
+    Page<Post> findByAuthorUsernameAndStatus(String username, PostStatus status, Pageable pageable);
+    @Query("SELECT p FROM Post p WHERE p.status = :status AND " +
+            "(LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(p.excerpt) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Post> searchPublishedPosts(@Param("keyword") String keyword, @Param("status") PostStatus status, Pageable pageable);
+
     List<Post> findTop5ByIsFeaturedFalseOrderByCreatedAtDesc();
+    List<Post> findTop5ByViewCountOrderByIdDesc(long viewCount);
 
     long countByAuthorId(Long authorId);
-    long countViewCountByAuthorId(Long authorId);
-
-    Page<Post> findByAuthorUsernameAndStatus(String username, PostStatus status, Pageable pageable);
 
     @Modifying
     @Transactional
@@ -40,5 +42,4 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("select viewCount from Post where slug = :slug")
     long findViewCountBySlug(String slug);
 
-    List<Post> findTop5ByViewCountOrderByIdDesc(long viewCount);
 }
