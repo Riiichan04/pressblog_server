@@ -8,13 +8,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import vn.id.devblog.blog_server.common.enums.PostStatus;
 import vn.id.devblog.blog_server.dto.response.post.PublicPostResponse;
+import vn.id.devblog.blog_server.dto.response.user.PublicUserProfileResponse;
 import vn.id.devblog.blog_server.models.Post;
+import vn.id.devblog.blog_server.models.User;
 import vn.id.devblog.blog_server.repositories.PostRepository;
+import vn.id.devblog.blog_server.repositories.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class SearchService {
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
     private final PostViewService postViewService;
 
     public Page<PublicPostResponse> searchPosts(String keyword, int page, int size) {
@@ -32,6 +36,19 @@ public class SearchService {
                 postViewService.getViewCount(post.getSlug()),
                 post.getCreatedAt(),
                 post.getUpdatedAt()
+        ));
+    }
+
+    public Page<PublicUserProfileResponse> searchAuthors(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> usersPage = userRepository.searchAuthors(keyword, pageable);
+
+        return usersPage.map(user -> new PublicUserProfileResponse(
+                user.getUsername(),
+                user.getDisplayName(),
+                user.getDescription(),
+                user.getAvatar(),
+                user.getCreatedAt()
         ));
     }
 }

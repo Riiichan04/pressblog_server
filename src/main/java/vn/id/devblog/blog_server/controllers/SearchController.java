@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import vn.id.devblog.blog_server.dto.response.post.PublicPostResponse;
+import vn.id.devblog.blog_server.dto.response.user.PublicUserProfileResponse;
 import vn.id.devblog.blog_server.services.SearchService;
 
 @RestController
@@ -27,6 +28,19 @@ public class SearchController {
         }
 
         Page<PublicPostResponse> result = searchService.searchPosts(q.trim(), page, size);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/author")
+    public ResponseEntity<Page<PublicUserProfileResponse>> searchAuthors(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        if (q == null || q.trim().isEmpty()) {
+            return ResponseEntity.ok(Page.empty());
+        }
+        Page<PublicUserProfileResponse> result = searchService.searchAuthors(q.trim(), page, size);
         return ResponseEntity.ok(result);
     }
 }
