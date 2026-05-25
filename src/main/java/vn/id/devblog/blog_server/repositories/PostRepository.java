@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import vn.id.devblog.blog_server.common.enums.PostStatus;
 import vn.id.devblog.blog_server.models.Post;
 import vn.id.devblog.blog_server.models.User;
 
@@ -25,6 +26,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     long countByAuthorId(Long authorId);
     long countViewCountByAuthorId(Long authorId);
+
+    Page<Post> findByAuthorUsernameAndStatus(String username, PostStatus status, Pageable pageable);
 
     @Modifying
     @Transactional
