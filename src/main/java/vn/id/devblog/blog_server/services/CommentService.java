@@ -80,27 +80,34 @@ public class CommentService {
 
     public Page<CommentResponse> getCommentByPostId(Long postId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Comment> listComment = commentRepository.findByPostId(postId, pageable);
+        Page<Comment> listComment = commentRepository.findByPostIdAndParentIdIsNullOrderByCreatedAtDesc(postId, pageable);
         return this.mapToResponse(listComment);
     }
 
     public Page<CommentResponse> getReplyComment(Long commentId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
         Page<Comment> listComment = commentRepository.findByParentId(commentId, pageable);
         return this.mapToResponse(listComment);
     }
 
     private Page<CommentResponse> mapToResponse(Page<Comment> comments) {
-        return comments.map(comment ->
-                new CommentResponse(
-                        comment.getId(),
-                        comment.getPost().getId(),
-                        comment.getAuthor().getId(),
-                        comment.getContent(),
-                        comment.getUpvote(),
-                        comment.getDownvote(),
-                        comment.getParent().getId()
-                )
-        );
+        return comments.map(comment -> {
+            Long parentId = comment.getParent() != null ? comment.getParent().getId() : null;
+            String authorDisplayName = comment.getAuthor().getDisplayName() != null ? comment.getAuthor().getDisplayName() : comment.getAuthor().getUsername();
+            int replyCount = commentRepository.countByParentId(comment.getId());
+
+            return new CommentResponse(
+                    comment.getId(),
+                    comment.getPost().getId(),
+                    comment.getAuthor().getAvatar(),
+                    authorDisplayName,
+                    comment.getContent(),
+                    comment.getUpvote(),
+                    comment.getDownvote(),
+                    parentId,
+                    replyCount,
+                    comment.getCreatedAt()
+            );
+        });
     }
 }

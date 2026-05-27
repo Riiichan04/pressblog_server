@@ -1,5 +1,6 @@
 package vn.id.devblog.blog_server.controllers;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -10,50 +11,50 @@ import vn.id.devblog.blog_server.dto.response.post.PostResponse;
 import vn.id.devblog.blog_server.services.CommentService;
 
 @RestController
-@RequestMapping("/comment")
+@RequestMapping("/comments")
+@RequiredArgsConstructor
 public class CommentController {
-    private CommentService commentService;
 
-    @Autowired
-    public CommentController(CommentService commentService) {
-        this.commentService = commentService;
-    }
+    private final CommentService commentService;
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<PostResponse> addComment(@RequestBody CommentRequest commentRequest) {
         PostResponse response = commentService.insertComment(commentRequest);
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/edit")
-    public ResponseEntity<PostResponse> editComment(@RequestParam Long id, @RequestBody CommentRequest commentRequest) {
+    @PutMapping("/{id}")
+    public ResponseEntity<PostResponse> editComment(
+            @PathVariable Long id,
+            @RequestBody CommentRequest commentRequest
+    ) {
         PostResponse response = commentService.updateComment(id, commentRequest);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<PostResponse> deleteComment(@RequestParam Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<PostResponse> deleteComment(@PathVariable Long id) {
         PostResponse response = commentService.deleteComment(id);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/get/{postId}")
+    @GetMapping("/posts/{postId}")
     public ResponseEntity<Page<CommentResponse>> getComment(
             @PathVariable Long postId,
-            @RequestParam(defaultValue = "0") int size,
-            @RequestParam(defaultValue = "10") int page
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        Page<CommentResponse> responses = commentService.getCommentByPostId(postId, size, page);
+        Page<CommentResponse> responses = commentService.getCommentByPostId(postId, page, size);
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/reply/get/{commentId}")
+    @GetMapping("/{commentId}/replies")
     public ResponseEntity<Page<CommentResponse>> getCommentReply(
             @PathVariable Long commentId,
-            @RequestParam(defaultValue = "0") int size,
-            @RequestParam(defaultValue = "10") int page
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        Page<CommentResponse> responses = commentService.getReplyComment(commentId, size, page);
+        Page<CommentResponse> responses = commentService.getReplyComment(commentId, page, size);
         return ResponseEntity.ok(responses);
     }
 }
