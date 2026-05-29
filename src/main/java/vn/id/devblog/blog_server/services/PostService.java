@@ -10,6 +10,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.id.devblog.blog_server.common.constants.PermissionConstants;
+import vn.id.devblog.blog_server.common.constants.RoleConstants;
+import vn.id.devblog.blog_server.common.enums.AppPermission;
 import vn.id.devblog.blog_server.common.utilities.HtmlCleaner;
 import vn.id.devblog.blog_server.common.utilities.SlugUtils;
 import vn.id.devblog.blog_server.dto.request.post.PostRequest;
@@ -18,6 +21,7 @@ import vn.id.devblog.blog_server.dto.response.post.PostAuthor;
 import vn.id.devblog.blog_server.dto.response.post.PostResponse;
 import vn.id.devblog.blog_server.models.Post;
 import vn.id.devblog.blog_server.models.Tag;
+import vn.id.devblog.blog_server.models.User;
 import vn.id.devblog.blog_server.repositories.CategoryRepository;
 import vn.id.devblog.blog_server.repositories.PostRepository;
 import vn.id.devblog.blog_server.repositories.TagRepository;
@@ -26,6 +30,7 @@ import vn.id.devblog.blog_server.repositories.UserRepository;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,66 +62,87 @@ public class PostService {
 
 
     @Transactional
-    public PostResponse insertNewPost(PostRequest request) {
-        if (validatePostRequest(request)) {
-            Post post = new Post();
-            post.setName(request.name());
-            post.setContent(HtmlCleaner.cleanHtml(request.content()));
-            post.setSlug(SlugUtils.toSlug(request.name()));
-            post.setThumbnail(request.thumbnail());
-            post.setAuthor(userRepository.findByEmail(request.email()));
-            post.setCategory(categoryRepository.findBySlug(request.categoryName()));
-            post.setLanguage(request.language());
-            post.setExcerpt(request.excerpt());
-            Set<Tag> tags = this.extractTags(request.listTag());
-            post.setTags(tags);
-            postRepository.save(post);
+    public PostResponse insertNewPost(PostRequest request, User currentUser) {
+        //Extract from validatePostRequest method
+        if (request.content() == null || request.content().length() > DEFAULT_POST_LENGTH) {
+            return new PostResponse(false, "Content not valid or too long");
+        }
 
-            verifyImages(request.content(), request.thumbnail());
+        Post post = new Post();
+        post.setName(request.name());
+        post.setContent(HtmlCleaner.cleanHtml(request.content()));
+        post.setSlug(SlugUtils.toSlug(request.name()));
+        post.setThumbnail(request.thumbnail());
+        post.setAuthor(currentUser);
+        post.setCategory(categoryRepository.findBySlug(request.categoryName()));
+        post.setLanguage(request.language());
+        post.setExcerpt(request.excerpt());
+        post.setTags(this.extractTags(request.listTag()));
 
-            return new PostResponse(true, "Add new post successfully");
-        } else return new PostResponse(false, "Failed to add new post");
+        postRepository.save(post);
+        verifyImages(request.content(), request.thumbnail());
+        return new PostResponse(true, "Add new post successfully");
     }
 
     @Transactional
-    public PostResponse updatePost(Long id, PostRequest request) {
+    public PostResponse updatePost(Long id, PostRequest request, User currentUser) {
         Post post = postRepository.findById(id).orElse(null);
         if (post == null) {
             return new PostResponse(false, "Post not found");
+        }
+
+
+        boolean isOwner = Objects.equals(post.getAuthor().getId(), currentUser.getId());
+
+        boolean hasAdminRight = currentUser.getAuthorities().stream()
+                .anyMatch(auth ->
+                        Objects.equals(auth.getAuthority(), PermissionConstants.UPDATE_ANY_POST) ||
+                                Objects.equals(auth.getAuthority(), RoleConstants.ROLE_ADMIN)
+                );
+        if (!isOwner && !hasAdminRight) {
+            return new PostResponse(false, "You don't have permission to edit this blog");
         }
 
         post.setName(request.name());
         post.setContent(HtmlCleaner.cleanHtml(request.content()));
         post.setThumbnail(request.thumbnail());
 
-        //Update slug
         String newSlug = SlugUtils.toSlug(request.name());
         if (!post.getSlug().equals(newSlug)) {
             post.setSlug(SlugUtils.toSlug(newSlug));
         }
 
-        // Update categories and tags
         post.setCategory(categoryRepository.findByName(request.categoryName()));
         post.getTags().clear();
         this.extractTags(request.listTag()).forEach(tag -> post.getTags().add(tag));
 
         postRepository.save(post);
-
         verifyImages(request.content(), request.thumbnail());
-
         return new PostResponse(true, "Update post successfully");
     }
 
     @Transactional
-    public PostResponse deletePost(Long id) {
+    public PostResponse deletePost(Long id, User currentUser) {
         Post post = postRepository.findById(id).orElse(null);
         if (post == null) {
             return new PostResponse(false, "Post not found");
         }
+
+        boolean isOwner = Objects.equals(post.getAuthor().getId(), currentUser.getId());
+        boolean hasAdminRight = currentUser.getAuthorities().stream()
+                .anyMatch(auth ->
+                        Objects.equals(auth.getAuthority(), PermissionConstants.DELETE_ANY_POST) ||
+                                Objects.equals(auth.getAuthority(), RoleConstants.ROLE_ADMIN));
+
+        if (!isOwner && !hasAdminRight) {
+            return new PostResponse(false, "You don't have permission to delete this blog");
+        }
+
         post.setDeleted(true);
         postRepository.save(post);
         return new PostResponse(true, "Delete post successfully");
     }
+
 
     public Page<GetPostResponse> getPostByUser(long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -151,10 +177,6 @@ public class PostService {
 
     public List<GetPostResponse> getNewestPost() {
         return postRepository.findTop5ByIsFeaturedFalseOrderByCreatedAtDesc().stream().map(PostService::mapPostToGetPostResponse).collect(Collectors.toList());
-    }
-
-    private boolean validatePostRequest(PostRequest request) {
-        return userRepository.findByEmail(request.email()) != null && request.content().length() <= DEFAULT_POST_LENGTH;
     }
 
     private Set<Tag> extractTags(Set<String> rawTags) {

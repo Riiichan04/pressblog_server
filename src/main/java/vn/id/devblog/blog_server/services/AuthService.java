@@ -1,7 +1,9 @@
 package vn.id.devblog.blog_server.services;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.id.devblog.blog_server.dto.request.auth.LoginRequest;
@@ -14,7 +16,6 @@ import vn.id.devblog.blog_server.models.User;
 import vn.id.devblog.blog_server.repositories.RoleRepository;
 import vn.id.devblog.blog_server.repositories.UserRepository;
 import vn.id.devblog.blog_server.security.JwtConfig;
-import vn.id.devblog.blog_server.security.PasswordEncryption;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,18 +23,13 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final JwtConfig jwtConfig;
-
-    @Autowired
-    public AuthService(UserRepository userRepository, RoleRepository roleRepository, JwtConfig jwtConfig) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.jwtConfig = jwtConfig;
-    }
+    private final PasswordEncoder passwordEncoder;
 
     public AuthResponse login(LoginRequest input) {
         User targetUser = userRepository.findByEmail(input.email());
@@ -41,7 +37,7 @@ public class AuthService {
             return new AuthResponse(false, "Wrong password or email", null);
         }
 
-        boolean isPasswordMatch = PasswordEncryption.checkPassword(input.password(), targetUser.getPassword());
+        boolean isPasswordMatch = passwordEncoder.matches(input.password(), targetUser.getPassword());
         if (!isPasswordMatch) {
             return new AuthResponse(false, "Wrong password or email", null);
         }
@@ -74,13 +70,13 @@ public class AuthService {
         User newUser = new User();
         newUser.setEmail(input.email());
         newUser.setUsername(normalizedUsername);
-        newUser.setPassword(PasswordEncryption.hashPassword(input.password()));
+        newUser.setPassword(passwordEncoder.encode(input.password()));
 
         Role defaultRole = roleRepository.findByName("USER");
         if (defaultRole != null) {
             newUser.setRole(defaultRole);
         } else {
-            log.warn("Chưa có role USER trong Database! Cần tạo sẵn data Role.");
+            log.warn("USER role not found");
         }
 
         this.userRepository.save(newUser);

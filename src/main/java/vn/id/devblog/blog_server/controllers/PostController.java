@@ -1,47 +1,59 @@
 package vn.id.devblog.blog_server.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import vn.id.devblog.blog_server.dto.request.post.PostRequest;
 import vn.id.devblog.blog_server.dto.response.post.GetPostResponse;
 import vn.id.devblog.blog_server.dto.response.post.PostResponse;
+import vn.id.devblog.blog_server.models.User;
 import vn.id.devblog.blog_server.services.PostService;
 import vn.id.devblog.blog_server.services.PostViewService;
 
 @RestController
 @RequestMapping("/post")
+@RequiredArgsConstructor
 public class PostController {
     private PostService postService;
     private PostViewService postViewService;
 
-    @Autowired
-    public PostController(PostService postService, PostViewService postViewService) {
-        this.postService = postService;
-        this.postViewService = postViewService;
-    }
-
-    @PostMapping("/upload")
-    public ResponseEntity<PostResponse> uploadNewPost(@RequestBody PostRequest postRequest) {
-        PostResponse response = postService.insertNewPost(postRequest);
+    //Add new blog
+    @PostMapping
+    public ResponseEntity<PostResponse> uploadNewPost(
+            @RequestBody PostRequest postRequest,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        PostResponse response = postService.insertNewPost(postRequest, currentUser);
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/edit")
-    public ResponseEntity<PostResponse> editPost(@RequestParam Long id, @RequestBody PostRequest postRequest) {
-        PostResponse response = postService.updatePost(id, postRequest);
+    //Edit blog
+    @PutMapping("/{id}")
+    public ResponseEntity<PostResponse> editPost(
+            @PathVariable Long id,
+            @RequestBody PostRequest postRequest,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        PostResponse response = postService.updatePost(id, postRequest, currentUser);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<PostResponse> deletePost(@RequestBody Long id) {
-        PostResponse response = postService.deletePost(id);
+    //Delete blog
+    @DeleteMapping("/{id}")
+    public ResponseEntity<PostResponse> deletePost(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        PostResponse response = postService.deletePost(id, currentUser);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/get/{id}")
+
+    @GetMapping("/author/{id}")
     public ResponseEntity<Page<GetPostResponse>> getPostByAuthor(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
