@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,6 +21,7 @@ public class AuthDto {
     private String description;
     private boolean isActive;
     private boolean isVerified;
-    private int role;
+    private String role;
+    private List<String> permissions;
     private String jwtToken;
 }

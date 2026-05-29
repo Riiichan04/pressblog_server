@@ -8,20 +8,30 @@ import vn.id.devblog.blog_server.dto.request.auth.LoginRequest;
 import vn.id.devblog.blog_server.dto.request.auth.RegisterRequest;
 import vn.id.devblog.blog_server.dto.response.auth.AuthDto;
 import vn.id.devblog.blog_server.dto.response.auth.AuthResponse;
+import vn.id.devblog.blog_server.models.Permission;
+import vn.id.devblog.blog_server.models.Role;
 import vn.id.devblog.blog_server.models.User;
+import vn.id.devblog.blog_server.repositories.RoleRepository;
 import vn.id.devblog.blog_server.repositories.UserRepository;
 import vn.id.devblog.blog_server.security.JwtConfig;
 import vn.id.devblog.blog_server.security.PasswordEncryption;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Service
 @Slf4j
 public class AuthService {
+
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final JwtConfig jwtConfig;
 
     @Autowired
-    public AuthService(UserRepository userRepository, JwtConfig jwtConfig) {
+    public AuthService(UserRepository userRepository, RoleRepository roleRepository, JwtConfig jwtConfig) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.jwtConfig = jwtConfig;
     }
 
@@ -30,11 +40,20 @@ public class AuthService {
         if (targetUser == null) {
             return new AuthResponse(false, "Wrong password or email", null);
         }
+
         boolean isPasswordMatch = PasswordEncryption.checkPassword(input.password(), targetUser.getPassword());
         if (!isPasswordMatch) {
             return new AuthResponse(false, "Wrong password or email", null);
         }
-        String jwtToken = jwtConfig.generateToken(targetUser.getId(), targetUser.getRole());
+
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("userId", targetUser.getId());
+        if (targetUser.getRole() != null) {
+            extraClaims.put("userRole", targetUser.getRole().getName());
+        }
+
+        String jwtToken = jwtConfig.generateToken(extraClaims, targetUser);
+
         AuthDto dto = getAuthDto(targetUser, jwtToken);
         return new AuthResponse(true, "Login success!", dto);
     }
@@ -56,6 +75,14 @@ public class AuthService {
         newUser.setEmail(input.email());
         newUser.setUsername(normalizedUsername);
         newUser.setPassword(PasswordEncryption.hashPassword(input.password()));
+
+        Role defaultRole = roleRepository.findByName("USER");
+        if (defaultRole != null) {
+            newUser.setRole(defaultRole);
+        } else {
+            log.warn("Chưa có role USER trong Database! Cần tạo sẵn data Role.");
+        }
+
         this.userRepository.save(newUser);
 
         return new AuthResponse(true, "register_success", null);
@@ -70,10 +97,22 @@ public class AuthService {
         dto.setDisplayName(targetUser.getDisplayName());
         dto.setEmail(targetUser.getEmail());
         dto.setGender(targetUser.getGender());
-        dto.setRole(targetUser.getRole());
         dto.setUsername(targetUser.getUsername());
         dto.setVerified(targetUser.isVerified());
         dto.setJwtToken(jwtToken);
+
+        //Handle role and permission
+        if (targetUser.getRole() != null) {
+            dto.setRole(targetUser.getRole().getName());
+            if (targetUser.getRole().getPermissions() != null) {
+                List<String> permissionNames = targetUser.getRole().getPermissions()
+                        .stream()
+                        .map(Permission::getName)
+                        .toList();
+                dto.setPermissions(permissionNames);
+            }
+        }
+
         return dto;
     }
 }
