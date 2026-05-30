@@ -17,8 +17,8 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class UserDashboardController {
-    PostRepository postRepository;
-    UserDashboardService userDashboardService;
+    private final PostRepository postRepository;
+    private final UserDashboardService userDashboardService;
 
     @GetMapping("/stats")
     public ResponseEntity<DashboardStatResponse> getDashboardStats(

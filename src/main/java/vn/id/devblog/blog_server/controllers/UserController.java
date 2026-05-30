@@ -16,7 +16,7 @@ import vn.id.devblog.blog_server.services.UserService;
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
-    UserService userService;
+    private final UserService userService;
 
     @PutMapping("/password")
     public ResponseEntity<AuthResponse> updatePassword(

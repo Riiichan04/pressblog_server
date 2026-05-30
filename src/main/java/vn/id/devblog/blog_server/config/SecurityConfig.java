@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,17 +30,25 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        //Search
                         .requestMatchers("/api/v1/search/**").permitAll()
+                        //Get blog detail
                         .requestMatchers("/api/v1/post/metadata/**").permitAll()
                         .requestMatchers("/api/v1/post/get/**").permitAll()
                         .requestMatchers("/api/v1/post/slug/**").permitAll()
+                        .requestMatchers("/api/v1/comments/posts/**").permitAll()
+                        //For login and register
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        //For home and landing page
+                        .requestMatchers("/api/v1/newest/**").permitAll()
+                        .requestMatchers("/api/v1/featured/**").permitAll()
 
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .cors(Customizer.withDefaults())
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

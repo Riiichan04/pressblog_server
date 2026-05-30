@@ -14,7 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/upload")
 public class UploadController {
-    UploadService service;
+    private final UploadService service;
 
     @Autowired
     public UploadController(UploadService service) {

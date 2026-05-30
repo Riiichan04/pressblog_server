@@ -18,8 +18,8 @@ import vn.id.devblog.blog_server.services.PostViewService;
 @RequestMapping("/post")
 @RequiredArgsConstructor
 public class PostController {
-    private PostService postService;
-    private PostViewService postViewService;
+    private final PostService postService;
+    private final PostViewService postViewService;
 
     //Add new blog
     @PostMapping

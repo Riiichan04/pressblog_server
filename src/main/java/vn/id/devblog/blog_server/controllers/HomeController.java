@@ -1,5 +1,6 @@
 package vn.id.devblog.blog_server.controllers;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,13 +13,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/")
+@RequiredArgsConstructor
 public class HomeController {
-    PostService postService;
-
-    @Autowired
-    public HomeController(PostService postService) {
-        this.postService = postService;
-    }
+    private final PostService postService;
 
     @GetMapping("/featured")
     public ResponseEntity<GetPostResponse> getFeaturedPost() {

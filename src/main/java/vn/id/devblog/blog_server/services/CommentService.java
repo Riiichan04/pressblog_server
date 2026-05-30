@@ -1,5 +1,6 @@
 package vn.id.devblog.blog_server.services;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -7,60 +8,53 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.id.devblog.blog_server.common.constants.PermissionConstants;
+import vn.id.devblog.blog_server.common.constants.RoleConstants;
 import vn.id.devblog.blog_server.dto.request.post.CommentRequest;
-import vn.id.devblog.blog_server.dto.request.post.PostRequest;
 import vn.id.devblog.blog_server.dto.response.post.CommentResponse;
-import vn.id.devblog.blog_server.dto.response.post.GetPostResponse;
 import vn.id.devblog.blog_server.dto.response.post.PostResponse;
 import vn.id.devblog.blog_server.models.Comment;
 import vn.id.devblog.blog_server.models.Post;
-import vn.id.devblog.blog_server.models.Tag;
 import vn.id.devblog.blog_server.models.User;
 import vn.id.devblog.blog_server.repositories.CommentRepository;
 import vn.id.devblog.blog_server.repositories.PostRepository;
 import vn.id.devblog.blog_server.repositories.UserRepository;
 
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class CommentService {
-    private CommentRepository commentRepository;
-    private UserRepository userRepository;
-    private PostRepository postRepository;
-
-    @Autowired
-    public CommentService(CommentRepository commentRepository, UserRepository userRepository, PostRepository postRepository) {
-        this.commentRepository = commentRepository;
-        this.userRepository = userRepository;
-        this.postRepository = postRepository;
-    }
+    private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
+    private final PostRepository postRepository;
 
     @Transactional
-    public PostResponse insertComment(CommentRequest commentRequest) {
-        User owner = userRepository.findById(commentRequest.authorId()).orElse(null);
+    public PostResponse insertComment(CommentRequest commentRequest, User author) {
         Post post = postRepository.findById(commentRequest.postId()).orElse(null);
-        if (owner == null || post == null) {
+        if (post == null) {
             return new PostResponse(false, "Invalid Request");
         }
         Comment comment = new Comment();
-        comment.setAuthor(owner);
+        comment.setAuthor(author);
         comment.setPost(post);
         comment.setContent(commentRequest.content());
         if (commentRequest.commentId() != null) {
             comment.setParent(commentRepository.findById(commentRequest.commentId()).orElse(null));
-        }
-        else comment.setParent(null);
+        } else comment.setParent(null);
         commentRepository.save(comment);
         return new PostResponse(true, "Upload comment successfully");
     }
 
     @Transactional
-    public PostResponse updateComment(Long id, CommentRequest commentRequest) {
-        User owner = userRepository.findById(commentRequest.authorId()).orElse(null);
+    public PostResponse updateComment(Long commentId, CommentRequest commentRequest, User user) {
         Post post = postRepository.findById(commentRequest.postId()).orElse(null);
-        Comment targetComment = commentRepository.findById(commentRequest.commentId()).orElse(null);
-        if (owner == null || post == null || targetComment == null) {
+        Comment targetComment = commentRepository.findById(commentId).orElse(null);
+        if (user == null || post == null || targetComment == null) {
             return new PostResponse(false, "Invalid Request");
+        }
+        if (!targetComment.getAuthor().getId().equals(user.getId())) {
+            return new PostResponse(false, "You don't have permission to edit this comment");
         }
         targetComment.setContent(commentRequest.content());
         commentRepository.save(targetComment);
@@ -68,11 +62,23 @@ public class CommentService {
     }
 
     @Transactional
-    public PostResponse deleteComment(Long id) {
+    public PostResponse deleteComment(Long id, User user) {
         Comment targetComment = commentRepository.findById(id).orElse(null);
         if (targetComment == null) {
             return new PostResponse(false, "Invalid Request");
         }
+        boolean hasAdminRight = user.getAuthorities().stream()
+                .anyMatch(auth ->
+                        Objects.equals(auth.getAuthority(), PermissionConstants.DELETE_ANY_COMMENT) ||
+                                Objects.equals(auth.getAuthority(), RoleConstants.ROLE_ADMIN)
+                );
+
+        boolean isOwnerComment = targetComment.getAuthor().getId().equals(user.getId());
+
+        if (!isOwnerComment && !hasAdminRight) {
+            return new PostResponse(false, "You don't have permission to delete this comment");
+        }
+
         targetComment.setDeleted(true);
         commentRepository.save(targetComment);
         return new PostResponse(true, "Deleted comment successfully");

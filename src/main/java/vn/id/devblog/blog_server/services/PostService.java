@@ -167,7 +167,8 @@ public class PostService {
                 rawResponse.status(),
                 postViewService.getViewCount(slug),
                 rawResponse.updatedAt(),
-                rawResponse.language()
+                rawResponse.language(),
+                rawResponse.excerpt()
         );
     }
 
@@ -216,7 +217,7 @@ public class PostService {
                 post.getTags().stream().map(Tag::getName).collect(Collectors.toSet()),
                 post.getStatus(),
                 post.getViewCount(),
-                post.getUpdatedAt(), post.getLanguage()
+                post.getUpdatedAt(), post.getLanguage(), post.getExcerpt()
         );
     }
 

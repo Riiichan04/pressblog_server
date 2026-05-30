@@ -18,7 +18,8 @@ public record GetPostResponse(
         PostStatus status,
         long viewCount,
         LocalDateTime updatedAt,
-        PostLanguage language
+        PostLanguage language,
+        String excerpt
 ) {
 }
 

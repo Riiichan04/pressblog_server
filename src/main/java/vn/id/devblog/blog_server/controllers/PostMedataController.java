@@ -1,5 +1,6 @@
 package vn.id.devblog.blog_server.controllers;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,13 +16,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/post/metadata")
+@RequiredArgsConstructor
 public class PostMedataController {
-    PostMetadataService postMetadataService;
-
-    @Autowired
-    public PostMedataController(PostMetadataService postMetadataService) {
-        this.postMetadataService = postMetadataService;
-    }
+    private final PostMetadataService postMetadataService;
 
     @GetMapping("/category")
     public ResponseEntity<List<Category>> getAllCategories() {
