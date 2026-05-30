@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/post/get/**").permitAll()
                         .requestMatchers("/api/v1/post/slug/**").permitAll()
                         .requestMatchers("/api/v1/comments/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/comments/**").permitAll()
                         //For login and register
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         //For home and landing page
