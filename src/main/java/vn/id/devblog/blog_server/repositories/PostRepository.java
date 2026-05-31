@@ -19,17 +19,19 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findBySlug(String slug);
     Page<Post> findByAuthorId(Long authorId, Pageable pageable);
-    Optional<Post> findByIsFeaturedTrue();
+    Optional<Post> findFirstByIsFeaturedTrueAndIsDeletedFalseAndStatus(PostStatus status);
     Page<Post> findByAuthorUsernameAndStatus(String username, PostStatus status, Pageable pageable);
-    @Query("SELECT p FROM Post p WHERE p.status = :status AND " +
+
+    @Query("SELECT p FROM Post p WHERE p.isDeleted = false AND p.status = :status AND " +
             "(LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(p.excerpt) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Post> searchPublishedPosts(@Param("keyword") String keyword, @Param("status") PostStatus status, Pageable pageable);
 
-    List<Post> findTop5ByIsFeaturedFalseOrderByCreatedAtDesc();
-    List<Post> findTop5ByViewCountOrderByIdDesc(long viewCount);
+    List<Post> findTop5ByIsDeletedFalseAndStatusOrderByCreatedAtDesc();
+    List<Post> findTop5ByIsDeletedFalseAndStatusOrderByViewCountDesc(long viewCount);
 
     long countByAuthorId(Long authorId);
+
 
     @Modifying
     @Transactional
@@ -42,4 +44,16 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("select viewCount from Post where slug = :slug")
     long findViewCountBySlug(String slug);
 
+    int countByCategoryId(int categoryId);
+
+    @Query("""
+        SELECT p FROM Post p
+        LEFT JOIN FETCH p.category c
+        LEFT JOIN FETCH p.author a
+        LEFT JOIN FETCH p.tags t
+        WHERE p.slug = :slug
+          AND p.isDeleted = false
+          AND p.status = :status
+    """)
+    Optional<Post> findValidPublicPostBySlug(@Param("slug") String slug, @Param("status") PostStatus status);
 }

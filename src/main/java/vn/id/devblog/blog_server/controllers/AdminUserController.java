@@ -11,7 +11,7 @@ import vn.id.devblog.blog_server.services.AdminUserService;
 @RestController
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'MOD')")
 public class AdminUserController {
 
     private final AdminUserService adminUserService;

@@ -12,7 +12,7 @@ import vn.id.devblog.blog_server.services.AdminPostService;
 @RestController
 @RequestMapping("/admin/posts")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'MOD')")
 public class AdminPostController {
 
     private final AdminPostService adminPostService;

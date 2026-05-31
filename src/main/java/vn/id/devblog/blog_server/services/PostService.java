@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.id.devblog.blog_server.common.constants.PermissionConstants;
 import vn.id.devblog.blog_server.common.constants.RoleConstants;
 import vn.id.devblog.blog_server.common.enums.AppPermission;
+import vn.id.devblog.blog_server.common.enums.PostStatus;
 import vn.id.devblog.blog_server.common.utilities.HtmlCleaner;
 import vn.id.devblog.blog_server.common.utilities.SlugUtils;
 import vn.id.devblog.blog_server.dto.request.post.PostRequest;
@@ -151,7 +152,8 @@ public class PostService {
     }
 
     public GetPostResponse getPostBySlug(String slug) {
-        Post post = postRepository.findBySlug(slug).orElse(null);
+        //TODO: Change status to PUBLISHED after complete admin UI
+        Post post = postRepository.findValidPublicPostBySlug(slug, PostStatus.DRAFT).orElse(null);
         if (post == null) return null;
         GetPostResponse rawResponse = mapPostToGetPostResponse(post);
         //Map with redis view count
@@ -173,11 +175,12 @@ public class PostService {
     }
 
     public GetPostResponse getFeaturedPost() {
-        return mapPostToGetPostResponse(postRepository.findByIsFeaturedTrue().orElse(null));
+        //TODO: Change to PostStatus.PUBLISHED after complete admin ui
+        return mapPostToGetPostResponse(postRepository.findFirstByIsFeaturedTrueAndIsDeletedFalseAndStatus(PostStatus.DRAFT).orElse(null));
     }
 
     public List<GetPostResponse> getNewestPost() {
-        return postRepository.findTop5ByIsFeaturedFalseOrderByCreatedAtDesc().stream().map(PostService::mapPostToGetPostResponse).collect(Collectors.toList());
+        return postRepository.findTop5ByIsDeletedFalseAndStatusOrderByCreatedAtDesc().stream().map(PostService::mapPostToGetPostResponse).collect(Collectors.toList());
     }
 
     private Set<Tag> extractTags(Set<String> rawTags) {
@@ -213,8 +216,8 @@ public class PostService {
                 post.getId(), post.getName(),
                 post.getSlug(), post.getContent(),
                 post.getThumbnail(), author,
-                post.getCategory().getName(),
-                post.getTags().stream().map(Tag::getName).collect(Collectors.toSet()),
+                (post.getCategory() != null && !post.getCategory().isDeleted()) ? post.getCategory().getName() : "",
+                post.getTags() != null ? post.getTags().stream().map(Tag::getName).collect(Collectors.toSet()) : new HashSet<>(),
                 post.getStatus(),
                 post.getViewCount(),
                 post.getUpdatedAt(), post.getLanguage(), post.getExcerpt()

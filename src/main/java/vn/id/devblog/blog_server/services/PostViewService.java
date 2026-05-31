@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import vn.id.devblog.blog_server.common.enums.PostStatus;
 import vn.id.devblog.blog_server.models.Post;
 import vn.id.devblog.blog_server.repositories.PostRepository;
 
@@ -26,7 +27,8 @@ public class PostViewService {
     }
 
     public void incrementView(String slug, String userIp) {
-        Post post = postRepository.findBySlug(slug).orElse(null);
+        //TODO: Change to PUBLISHED after complete admin UI
+        Post post = postRepository.findValidPublicPostBySlug(slug, PostStatus.DRAFT).orElse(null);
         if (post == null) return;
 
         String viewKey = VIEW_KEY_PREFIX + slug;

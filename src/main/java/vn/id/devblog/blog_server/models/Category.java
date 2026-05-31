@@ -23,6 +23,9 @@ public class Category extends BaseEntity {
     private String name;
     @Column(unique = true)
     private String slug;
+    private String description;
+    @Column(nullable = false)
+    private boolean isDeleted = false;
 
     @OneToMany(mappedBy = "category")
     @JsonIgnore

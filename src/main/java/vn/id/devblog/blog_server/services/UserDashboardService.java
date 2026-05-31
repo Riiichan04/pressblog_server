@@ -43,7 +43,7 @@ public class UserDashboardService {
     }
 
     public List<TrendingPostDto> getTopTrendingPosts(Long userId) {
-        List<Post> trendingPosts = postRepository.findTop5ByViewCountOrderByIdDesc(userId);
+        List<Post> trendingPosts = postRepository.findTop5ByIsDeletedFalseAndStatusOrderByViewCountDesc(userId);
         return trendingPosts.stream().map(post ->
                 new TrendingPostDto(
                         post.getId(),

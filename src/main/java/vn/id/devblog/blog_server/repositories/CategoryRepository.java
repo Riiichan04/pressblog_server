@@ -9,7 +9,8 @@ import vn.id.devblog.blog_server.models.Category;
 import java.util.List;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Long> {
+public interface CategoryRepository extends JpaRepository<Category, Integer> {
     Category findByName(String name);
     Category findBySlug(String slug);
+    List<Category> findByIsDeletedFalse(boolean deleted);
 }
