@@ -3,6 +3,7 @@ package vn.id.devblog.blog_server.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import vn.id.devblog.blog_server.common.enums.PostStatus;
 import vn.id.devblog.blog_server.models.Post;
 import vn.id.devblog.blog_server.repositories.PostRepository;
 
@@ -43,7 +44,8 @@ public class UserDashboardService {
     }
 
     public List<TrendingPostDto> getTopTrendingPosts(Long userId) {
-        List<Post> trendingPosts = postRepository.findTop5ByIsDeletedFalseAndStatusOrderByViewCountDesc(userId);
+        //TODO: Change to PostStatus.PUBLISHED after complete admin UI
+        List<Post> trendingPosts = postRepository.findTop5ByIsDeletedFalseAndAuthorIdAndStatusOrderByViewCountDesc(userId, PostStatus.DRAFT);
         return trendingPosts.stream().map(post ->
                 new TrendingPostDto(
                         post.getId(),

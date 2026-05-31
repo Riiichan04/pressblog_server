@@ -17,20 +17,19 @@ import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-    Optional<Post> findBySlug(String slug);
-    Page<Post> findByAuthorId(Long authorId, Pageable pageable);
+    Page<Post> findByAuthorIdAndIsDeletedFalse(Long authorId, Pageable pageable);
     Optional<Post> findFirstByIsFeaturedTrueAndIsDeletedFalseAndStatus(PostStatus status);
-    Page<Post> findByAuthorUsernameAndStatus(String username, PostStatus status, Pageable pageable);
+    Page<Post> findByAuthorUsernameAndStatusAndIsDeletedFalse(String username, PostStatus status, Pageable pageable);
 
     @Query("SELECT p FROM Post p WHERE p.isDeleted = false AND p.status = :status AND " +
             "(LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(p.excerpt) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Post> searchPublishedPosts(@Param("keyword") String keyword, @Param("status") PostStatus status, Pageable pageable);
 
-    List<Post> findTop5ByIsDeletedFalseAndStatusOrderByCreatedAtDesc();
-    List<Post> findTop5ByIsDeletedFalseAndStatusOrderByViewCountDesc(long viewCount);
+    List<Post> findTop5ByIsDeletedFalseAndStatusOrderByCreatedAtDesc(PostStatus status);
+    List<Post> findTop5ByIsDeletedFalseAndAuthorIdAndStatusOrderByViewCountDesc(Long userId, PostStatus status);
 
-    long countByAuthorId(Long authorId);
+    long countByAuthorIdAndIsDeletedFalse(Long authorId);
 
 
     @Modifying
@@ -38,11 +37,11 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("UPDATE Post p SET p.viewCount = :views WHERE p.slug = :slug")
     void updateViewCount(@Param("slug") String slug, @Param("views") long views);
 
-    @Query("SELECT SUM(p.viewCount) FROM Post p WHERE p.author.id = :authorId")
+    @Query("SELECT COALESCE(SUM(p.viewCount), 0) FROM Post p WHERE p.author.id = :authorId AND p.isDeleted = false")
     Long sumViewsByAuthorId(@Param("authorId") Long authorId);
 
-    @Query("select viewCount from Post where slug = :slug")
-    long findViewCountBySlug(String slug);
+    @Query("SELECT p.viewCount FROM Post p WHERE p.slug = :slug AND p.isDeleted = false")
+    long findViewCountBySlug(@Param("slug") String slug);
 
     int countByCategoryId(int categoryId);
 
@@ -56,4 +55,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
           AND p.status = :status
     """)
     Optional<Post> findValidPublicPostBySlug(@Param("slug") String slug, @Param("status") PostStatus status);
+
+    //For admin dashboard
+    long countByIsDeletedFalse();
+    long countByIsDeletedFalseAndStatus(PostStatus status);
+    @Query("SELECT COALESCE(SUM(p.viewCount), 0) FROM Post p WHERE p.isDeleted = false")
+    Long sumAllViews();
 }

@@ -37,7 +37,7 @@ public class UserPublicService {
     public Page<PublicPostResponse> getPublicPostsByAuthor(String username, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         //FIXME: Change to PostStatus.PUBLISHED after complete review post feature in admin
-        Page<Post> postsPage = postRepository.findByAuthorUsernameAndStatus(username, PostStatus.DRAFT, pageable);
+        Page<Post> postsPage = postRepository.findByAuthorUsernameAndStatusAndIsDeletedFalse(username, PostStatus.DRAFT, pageable);
 
         return postsPage.map(post -> new PublicPostResponse(
                 post.getId(),

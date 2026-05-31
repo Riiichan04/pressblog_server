@@ -26,7 +26,7 @@ public class UserDashboardController {
     ) {
         try {
             long extractedUserId = currentUser.getId();
-            long posts = postRepository.countByAuthorId(extractedUserId);
+            long posts = postRepository.countByAuthorIdAndIsDeletedFalse(extractedUserId);
             long views = postRepository.sumViewsByAuthorId(extractedUserId);
             long comments = 0;
             List<DailyViewStat> weekTrending = userDashboardService.getWeeklyTrends(extractedUserId);

@@ -85,11 +85,15 @@ public class CommentService {
     }
 
     public Page<CommentResponse> getCommentByPostId(Long postId, int page, int size) {
+        Post post = postRepository.findById(postId).orElse(null);
+        if (post == null || post.isDeleted() || !post.getStatus().name().equals("APPROVED")) {
+            return Page.empty();
+        }
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Comment> listComment = commentRepository.findByPostIdAndParentIdIsNullOrderByCreatedAtDesc(postId, pageable);
+        Page<Comment> listComment = commentRepository.findByPostIdAndParentIdIsNullAndIsDeletedFalseOrderByCreatedAtDesc(postId, pageable);
         return this.mapToResponse(listComment);
     }
-
     public Page<CommentResponse> getReplyComment(Long commentId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
         Page<Comment> listComment = commentRepository.findByParentId(commentId, pageable);

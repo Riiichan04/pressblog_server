@@ -147,7 +147,7 @@ public class PostService {
 
     public Page<GetPostResponse> getPostByUser(long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Post> listPost = postRepository.findByAuthorId(userId, pageable);
+        Page<Post> listPost = postRepository.findByAuthorIdAndIsDeletedFalse(userId, pageable);
         return this.mapToResponse(listPost);
     }
 
@@ -180,7 +180,7 @@ public class PostService {
     }
 
     public List<GetPostResponse> getNewestPost() {
-        return postRepository.findTop5ByIsDeletedFalseAndStatusOrderByCreatedAtDesc().stream().map(PostService::mapPostToGetPostResponse).collect(Collectors.toList());
+        return postRepository.findTop5ByIsDeletedFalseAndStatusOrderByCreatedAtDesc(PostStatus.DRAFT).stream().map(PostService::mapPostToGetPostResponse).collect(Collectors.toList());
     }
 
     private Set<Tag> extractTags(Set<String> rawTags) {
