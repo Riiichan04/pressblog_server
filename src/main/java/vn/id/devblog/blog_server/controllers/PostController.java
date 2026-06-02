@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import vn.id.devblog.blog_server.common.enums.PostStatus;
 import vn.id.devblog.blog_server.dto.request.post.PostRequest;
 import vn.id.devblog.blog_server.dto.response.post.GetPostResponse;
 import vn.id.devblog.blog_server.dto.response.post.PostResponse;
@@ -70,7 +71,7 @@ public class PostController {
             HttpServletRequest request
     ) {
         String ip = request.getRemoteAddr();
-        GetPostResponse response = postService.getPostBySlug(slug);
+        GetPostResponse response = postService.getPostBySlug(slug, PostStatus.PUBLISHED);
         postViewService.incrementView(slug, ip);
         return ResponseEntity.ok(response);
     }

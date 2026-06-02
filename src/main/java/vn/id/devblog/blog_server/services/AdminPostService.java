@@ -35,6 +35,22 @@ public class AdminPostService {
         ));
     }
 
+    public Page<AdminPostResponse> getPostsByStatus(PostStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Post> posts = postRepository.findByStatus(status, pageable);
+
+        return posts.map(post -> new AdminPostResponse(
+                post.getId(),
+                post.getName(),
+                post.getSlug(),
+                post.getAuthor().getUsername(),
+                post.getCategory() != null ? post.getCategory().getName() : "No Category",
+                post.getStatus(),
+                post.isDeleted(),
+                post.getCreatedAt()
+        ));
+    }
+
     @Transactional
     public boolean forceDeletePost(Long postId) {
         Post post = postRepository.findById(postId).orElse(null);

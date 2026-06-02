@@ -63,4 +63,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Long sumAllViews();
 
     List<Post> findByCreatedAtAfterAndIsDeletedFalse(LocalDateTime date);
+
+    Page<Post> findByStatus(PostStatus status, Pageable pageable);
 }

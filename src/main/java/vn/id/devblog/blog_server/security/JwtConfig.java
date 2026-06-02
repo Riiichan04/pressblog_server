@@ -27,7 +27,7 @@ public class JwtConfig {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        long expirationMillis = 3600000; //1hrs
+        long expirationMillis = 3600000 * 24; //1day
         return Jwts.builder()
                 .claims(extraClaims)
                 .subject(userDetails.getUsername())

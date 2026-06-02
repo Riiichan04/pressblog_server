@@ -151,8 +151,8 @@ public class PostService {
         return this.mapToResponse(listPost);
     }
 
-    public GetPostResponse getPostBySlug(String slug) {
-        Post post = postRepository.findValidPublicPostBySlug(slug, PostStatus.PUBLISHED).orElse(null);
+    public GetPostResponse getPostBySlug(String slug, PostStatus status) {
+        Post post = postRepository.findValidPublicPostBySlug(slug, status).orElse(null);
         if (post == null) return null;
         GetPostResponse rawResponse = mapPostToGetPostResponse(post);
         //Map with redis view count
