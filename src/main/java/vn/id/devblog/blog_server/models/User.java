@@ -73,14 +73,13 @@ public class User extends BaseEntity implements UserDetails {
         List<GrantedAuthority> authorities = new ArrayList<>();
 
         if (this.role != null) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + this.role.getName()));
+            authorities.add(new SimpleGrantedAuthority(this.role.getName()));
             if (this.role.getPermissions() != null) {
                 this.role.getPermissions().forEach(permission -> {
                     authorities.add(new SimpleGrantedAuthority(permission.getName()));
                 });
             }
         }
-
         return authorities;
     }
 

@@ -24,7 +24,7 @@ public class Category extends BaseEntity {
     @Column(unique = true)
     private String slug;
     private String description;
-    @Column(nullable = false)
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "boolean default false")
     private boolean isDeleted = false;
 
     @OneToMany(mappedBy = "category")

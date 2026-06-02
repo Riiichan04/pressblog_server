@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.id.devblog.blog_server.common.constants.RoleConstants;
 import vn.id.devblog.blog_server.dto.request.auth.LoginRequest;
 import vn.id.devblog.blog_server.dto.request.auth.RegisterRequest;
 import vn.id.devblog.blog_server.dto.response.auth.AuthDto;
@@ -72,7 +73,7 @@ public class AuthService {
         newUser.setUsername(normalizedUsername);
         newUser.setPassword(passwordEncoder.encode(input.password()));
 
-        Role defaultRole = roleRepository.findByName("USER");
+        Role defaultRole = roleRepository.findByName(RoleConstants.ROLE_USER);
         if (defaultRole != null) {
             newUser.setRole(defaultRole);
         } else {
