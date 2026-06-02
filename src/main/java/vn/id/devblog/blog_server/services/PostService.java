@@ -79,7 +79,7 @@ public class PostService {
         post.setLanguage(request.language());
         post.setExcerpt(request.excerpt());
         post.setTags(this.extractTags(request.listTag()));
-
+        post.setStatus(PostStatus.PENDING); //Confirm upload
         postRepository.save(post);
         verifyImages(request.content(), request.thumbnail());
         return new PostResponse(true, "Add new post successfully");
@@ -152,8 +152,7 @@ public class PostService {
     }
 
     public GetPostResponse getPostBySlug(String slug) {
-        //TODO: Change status to PUBLISHED after complete admin UI
-        Post post = postRepository.findValidPublicPostBySlug(slug, PostStatus.DRAFT).orElse(null);
+        Post post = postRepository.findValidPublicPostBySlug(slug, PostStatus.PUBLISHED).orElse(null);
         if (post == null) return null;
         GetPostResponse rawResponse = mapPostToGetPostResponse(post);
         //Map with redis view count
@@ -176,11 +175,11 @@ public class PostService {
 
     public GetPostResponse getFeaturedPost() {
         //TODO: Change to PostStatus.PUBLISHED after complete admin ui
-        return mapPostToGetPostResponse(postRepository.findFirstByIsFeaturedTrueAndIsDeletedFalseAndStatus(PostStatus.DRAFT).orElse(null));
+        return mapPostToGetPostResponse(postRepository.findFirstByIsFeaturedTrueAndIsDeletedFalseAndStatus(PostStatus.PUBLISHED).orElse(null));
     }
 
     public List<GetPostResponse> getNewestPost() {
-        return postRepository.findTop5ByIsDeletedFalseAndStatusOrderByCreatedAtDesc(PostStatus.DRAFT).stream().map(PostService::mapPostToGetPostResponse).collect(Collectors.toList());
+        return postRepository.findTop5ByIsDeletedFalseAndStatusOrderByCreatedAtDesc(PostStatus.PUBLISHED).stream().map(PostService::mapPostToGetPostResponse).collect(Collectors.toList());
     }
 
     private Set<Tag> extractTags(Set<String> rawTags) {

@@ -1,10 +1,12 @@
 package vn.id.devblog.blog_server.services;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import vn.id.devblog.blog_server.common.enums.PostStatus;
 import vn.id.devblog.blog_server.models.Post;
+import vn.id.devblog.blog_server.repositories.CommentRepository;
 import vn.id.devblog.blog_server.repositories.PostRepository;
 
 import vn.id.devblog.blog_server.dto.response.statistic.DashboardStatResponse.*;
@@ -15,17 +17,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserDashboardService {
-    PostRepository postRepository;
-    PostViewService postViewService;
+    private final PostRepository postRepository;
+    private final PostViewService postViewService;
     private final RedisTemplate<String, String> redisTemplate;
-
-    @Autowired
-    public UserDashboardService(RedisTemplate<String, String> redisTemplate, PostViewService postViewService, PostRepository postRepository) {
-        this.redisTemplate = redisTemplate;
-        this.postViewService = postViewService;
-        this.postRepository = postRepository;
-    }
+    private final CommentRepository commentRepository;
 
     public List<DailyViewStat> getWeeklyTrends(Long userId) {
         List<DailyViewStat> stats = new ArrayList<>();
@@ -44,15 +41,14 @@ public class UserDashboardService {
     }
 
     public List<TrendingPostDto> getTopTrendingPosts(Long userId) {
-        //TODO: Change to PostStatus.PUBLISHED after complete admin UI
-        List<Post> trendingPosts = postRepository.findTop5ByIsDeletedFalseAndAuthorIdAndStatusOrderByViewCountDesc(userId, PostStatus.DRAFT);
+        List<Post> trendingPosts = postRepository.findTop5ByIsDeletedFalseAndAuthorIdAndStatusOrderByViewCountDesc(userId, PostStatus.PUBLISHED);
         return trendingPosts.stream().map(post ->
                 new TrendingPostDto(
                         post.getId(),
                         post.getName(),
                         post.getStatus(),
                         postViewService.getViewCount(post.getSlug()),
-                        0L, //FIXME: Add actual comment count
+                        commentRepository.countByPostIdAndIsDeletedFalse(post.getId()),
                         post.getCreatedAt()
                 )
         ).collect(Collectors.toList());

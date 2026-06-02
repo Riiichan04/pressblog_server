@@ -25,7 +25,7 @@ public class SearchService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         //FIXME: Change to PostStatus.PUBLISHED after complete review post feature in admin
-        Page<Post> postsPage = postRepository.searchPublishedPosts(keyword, PostStatus.DRAFT, pageable);
+        Page<Post> postsPage = postRepository.searchPublishedPosts(keyword, PostStatus.PUBLISHED, pageable);
 
         return postsPage.map(post -> new PublicPostResponse(
                 post.getId(),

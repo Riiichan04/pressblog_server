@@ -10,8 +10,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import vn.id.devblog.blog_server.common.enums.PostStatus;
 import vn.id.devblog.blog_server.models.Post;
-import vn.id.devblog.blog_server.models.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,4 +61,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     long countByIsDeletedFalseAndStatus(PostStatus status);
     @Query("SELECT COALESCE(SUM(p.viewCount), 0) FROM Post p WHERE p.isDeleted = false")
     Long sumAllViews();
+
+    List<Post> findByCreatedAtAfterAndIsDeletedFalse(LocalDateTime date);
 }

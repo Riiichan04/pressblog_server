@@ -27,8 +27,7 @@ public class PostViewService {
     }
 
     public void incrementView(String slug, String userIp) {
-        //TODO: Change to PUBLISHED after complete admin UI
-        Post post = postRepository.findValidPublicPostBySlug(slug, PostStatus.DRAFT).orElse(null);
+        Post post = postRepository.findValidPublicPostBySlug(slug, PostStatus.PUBLISHED).orElse(null);
         if (post == null) return;
 
         String viewKey = VIEW_KEY_PREFIX + slug;
