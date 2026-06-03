@@ -23,9 +23,10 @@ public class AdminPostController {
     @PreAuthorize("hasAnyAuthority('UPDATE_ANY_POST', 'DELETE_ANY_POST', 'APPROVE_POST')")
     public ResponseEntity<Page<AdminPostResponse>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String category
     ) {
-        return ResponseEntity.ok(adminPostService.getAllPosts(page, size));
+        return ResponseEntity.ok(adminPostService.getAllPosts(page, size, category));
     }
 
     @DeleteMapping("/{id}")

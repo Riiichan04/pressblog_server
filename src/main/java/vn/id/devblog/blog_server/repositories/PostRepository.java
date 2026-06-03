@@ -65,4 +65,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByCreatedAtAfterAndIsDeletedFalse(LocalDateTime date);
 
     Page<Post> findByStatus(PostStatus status, Pageable pageable);
+
+    Page<Post> findByIsDeletedFalseAndCategory_Slug(String slug, Pageable pageable);
 }

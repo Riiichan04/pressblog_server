@@ -2,6 +2,7 @@ package vn.id.devblog.blog_server.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.id.devblog.blog_server.models.Category;
@@ -24,6 +25,10 @@ public class PostMetadataService {
 
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
+    }
+
+    public Page<Category> getPaginationCategories(Pageable pageable) {
+        return categoryRepository.findAll(pageable);
     }
 
     public Page<Tag> getAllTags(Pageable pageable) {

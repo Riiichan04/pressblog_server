@@ -18,10 +18,15 @@ public class AdminPostService {
 
     private final PostRepository postRepository;
 
-    public Page<AdminPostResponse> getAllPosts(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+    public Page<AdminPostResponse> getAllPosts(int page, int size, String categorySlug) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Post> posts;
 
-        Page<Post> posts = postRepository.findAll(pageable);
+        if (categorySlug != null && !categorySlug.trim().isEmpty()) {
+            posts = postRepository.findByIsDeletedFalseAndCategory_Slug(categorySlug, pageable);
+        } else {
+            posts = postRepository.findAll(pageable);
+        }
 
         return posts.map(post -> new AdminPostResponse(
                 post.getId(),
