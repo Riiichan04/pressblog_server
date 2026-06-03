@@ -10,6 +10,7 @@ public record AdminUserResponse(
         String roleName,
         boolean isActive,
         boolean isVerified,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String avatarUrl
 ) {
 }

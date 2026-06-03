@@ -2,9 +2,11 @@ package vn.id.devblog.blog_server.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import vn.id.devblog.blog_server.dto.request.user.UpdateProfileRequest;
 import vn.id.devblog.blog_server.dto.response.user.UserProfileResponse;
+import vn.id.devblog.blog_server.models.User;
 import vn.id.devblog.blog_server.services.UserService;
 
 @RestController
@@ -27,11 +29,10 @@ public class UserProfileController {
 
     @PutMapping("/update")
     public ResponseEntity<UserProfileResponse> updateProfile(
-            @RequestAttribute String userId,
+            @AuthenticationPrincipal User user,
             @RequestBody UpdateProfileRequest request
     ) {
-        Long id = Long.parseLong(userId);
-        UserProfileResponse response = userProfileService.updateProfile(id, request);
+        UserProfileResponse response = userProfileService.updateProfile(user.getId(), request);
         return ResponseEntity.ok(response);
     }
 }

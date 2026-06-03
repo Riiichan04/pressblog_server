@@ -15,12 +15,12 @@ import vn.id.devblog.blog_server.services.PostService;
 @RestController
 @RequestMapping("/admin/posts")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'MOD')")
 public class AdminPostController {
     private final PostService postService;
     private final AdminPostService adminPostService;
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('UPDATE_ANY_POST', 'DELETE_ANY_POST', 'APPROVE_POST')")
     public ResponseEntity<Page<AdminPostResponse>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -29,6 +29,7 @@ public class AdminPostController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('FORCE_DELETE_ANY_POST')")
     public ResponseEntity<String> forceDeletePost(@PathVariable Long id) {
         boolean result = adminPostService.forceDeletePost(id);
         if (result) {
@@ -38,6 +39,7 @@ public class AdminPostController {
     }
 
     @PutMapping("/{id}/restore")
+    @PreAuthorize("hasAuthority('RESTORE_ANY_POST')")
     public ResponseEntity<String> restorePost(@PathVariable Long id) {
         boolean result = adminPostService.restorePost(id);
         if (result) {
@@ -47,7 +49,7 @@ public class AdminPostController {
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('APPROVE_POST')")
+    @PreAuthorize("hasAnyAuthority('UPDATE_ANY_POST', 'APPROVE_POST')")
     public ResponseEntity<String> updatePostStatus(
             @PathVariable Long id,
             @RequestParam PostStatus status

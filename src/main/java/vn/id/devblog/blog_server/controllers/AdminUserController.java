@@ -11,12 +11,12 @@ import vn.id.devblog.blog_server.services.AdminUserService;
 @RestController
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'MOD')")
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('VIEW_USERS')")
     public ResponseEntity<Page<AdminUserResponse>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -24,9 +24,8 @@ public class AdminUserController {
         return ResponseEntity.ok(adminUserService.getAllUsers(page, size));
     }
 
-    //Update user status by admin.
-    //Admin can ban or unban account
     @PutMapping("/{id}/toggle-status")
+    @PreAuthorize("hasAuthority('BAN_USER')")
     public ResponseEntity<String> toggleUserStatus(@PathVariable Long id) {
         boolean result = adminUserService.toggleUserStatus(id);
         if (result) {
@@ -36,6 +35,7 @@ public class AdminUserController {
     }
 
     @PutMapping("/{id}/role")
+    @PreAuthorize("hasAuthority('UPDATE_USER_ROLE')")
     public ResponseEntity<String> changeUserRole(
             @PathVariable Long id,
             @RequestParam String roleName

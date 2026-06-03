@@ -31,7 +31,8 @@ public class AdminUserService {
                 user.getRole() != null ? user.getRole().getName() : "N/A",
                 user.isActive(),
                 user.isVerified(),
-                user.getCreatedAt()
+                user.getCreatedAt(),
+                user.getAvatar()
         ));
     }
 
