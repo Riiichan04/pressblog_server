@@ -1,5 +1,6 @@
 package vn.id.devblog.blog_server.services;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class VerificationService {
     private static final int LIMIT_ATTEMPT = 5;
     private static final int DEFAULT_OTP_LENGTH = 6;
@@ -25,19 +27,7 @@ public class VerificationService {
     private int otpLength = DEFAULT_OTP_LENGTH;
     private final VerificationRepository verificationRepository;
     private final UserRepository userRepository;
-
-    @Autowired
-    public VerificationService(VerificationRepository verificationRepository, UserRepository userRepository) {
-        this.verificationRepository = verificationRepository;
-        this.userRepository = userRepository;
-    }
-
-    public VerificationService(int limitAttempt, int otpLength, VerificationRepository verificationRepository, UserRepository userRepository) {
-        this.limitAttempt = limitAttempt;
-        this.otpLength = otpLength;
-        this.verificationRepository = verificationRepository;
-        this.userRepository = userRepository;
-    }
+    private final MailService mailService;
 
     @Transactional
     public GenerateVerifyResponse sendVerificationCode(String email, VerificationType type) {
@@ -68,6 +58,8 @@ public class VerificationService {
             verificationRepository.save(savedVerification);
 
             //Send mail
+            mailService.sendOtpEmail(email, otp);
+
             return new GenerateVerifyResponse(true, "Sent verification code successfully. Check your email to get your verification code.");
         }
         catch (Exception e) {
@@ -79,7 +71,7 @@ public class VerificationService {
     public GenerateVerifyResponse verifyUser(String email, String otp) {
         try {
             User targetUser = userRepository.findByEmail(email);
-            if (email == null) {
+            if (targetUser == null) {
                 return new GenerateVerifyResponse(false, "User not found");
             }
 
@@ -98,7 +90,7 @@ public class VerificationService {
     public GenerateVerifyResponse verifyResetPassword(String email, String otp, String newPassword) {
         try {
             User targetUser = userRepository.findByEmail(email);
-            if (email == null) {
+            if (targetUser == null) {
                 return new GenerateVerifyResponse(false, "User not found");
             }
 
@@ -129,12 +121,16 @@ public class VerificationService {
                 );
             }
             //Check expired time
-            if (targetVerification.getExpiredAt().isAfter(LocalDateTime.now())) {
+            if (targetVerification.getExpiredAt().isBefore(LocalDateTime.now())) {
                 verificationRepository.delete(targetVerification);
                 return new GenerateVerifyResponse(false, "Verification code expired");
             }
 
             if (!targetVerification.getCode().equals(otpCode)) {
+                if (targetVerification.getType() == VerificationType.VERIFY_USER) {
+                    targetVerification.setAttempts(targetVerification.getAttempts() + 1);
+                    verificationRepository.save(targetVerification);
+                }
                 return new GenerateVerifyResponse(false, "Verification code does not match");
             }
             //Success

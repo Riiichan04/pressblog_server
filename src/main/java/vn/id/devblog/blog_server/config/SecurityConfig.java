@@ -40,6 +40,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/comments/**").permitAll()
                         //For login and register
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/verify/send/reset-password/**").permitAll()
+                        .requestMatchers("/api/v1/verify/reset-password/**").permitAll()
+
                         //For home and landing page
                         .requestMatchers("/api/v1/newest/**").permitAll()
                         .requestMatchers("/api/v1/featured/**").permitAll()

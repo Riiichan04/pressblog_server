@@ -20,13 +20,17 @@ public class VerificationController {
 
     @PostMapping("/send/reset-password")
     public ResponseEntity<GenerateVerifyResponse> sendResetPassword(@RequestBody String email) {
-        GenerateVerifyResponse response = verificationService.sendVerificationCode(email, VerificationType.RESET_PASSWORD);
+        //TODO: Fix email format here
+        String cleanEmail = email.replaceAll("^\"|\"$", "");
+        GenerateVerifyResponse response = verificationService.sendVerificationCode(cleanEmail, VerificationType.RESET_PASSWORD);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/send/account")
     public ResponseEntity<GenerateVerifyResponse> sendVerifyAccount(@RequestBody String email) {
-        GenerateVerifyResponse response = verificationService.sendVerificationCode(email, VerificationType.VERIFY_USER);
+        //TODO: Fix email format here
+        String cleanEmail = email.replaceAll("^\"|\"$", "");
+        GenerateVerifyResponse response = verificationService.sendVerificationCode(cleanEmail, VerificationType.VERIFY_USER);
         return ResponseEntity.ok(response);
     }
 
