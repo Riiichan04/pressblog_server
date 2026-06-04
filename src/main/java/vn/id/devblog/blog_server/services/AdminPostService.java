@@ -129,4 +129,19 @@ public class AdminPostService {
             return false;
         }
     }
+
+    public List<AdminPostResponse> getFeaturedPosts() {
+        List<Post> posts = postRepository.findByIsFeaturedTrueOrderByFeaturedOrderAsc();
+
+        return posts.stream().map(post -> new AdminPostResponse(
+                post.getId(),
+                post.getName(),
+                post.getSlug(),
+                post.getAuthor().getUsername(),
+                post.getCategory() != null ? post.getCategory().getName() : "No Category",
+                post.getStatus(),
+                post.isDeleted(),
+                post.getCreatedAt()
+        )).collect(Collectors.toList());
+    }
 }

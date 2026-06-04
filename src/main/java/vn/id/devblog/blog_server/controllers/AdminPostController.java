@@ -89,4 +89,10 @@ public class AdminPostController {
         }
         return ResponseEntity.badRequest().body("Error when update featured post");
     }
+
+    @GetMapping("/featured")
+    @PreAuthorize("hasAnyAuthority('UPDATE_ANY_POST', 'APPROVE_POST')")
+    public ResponseEntity<List<AdminPostResponse>> getFeaturedPosts() {
+        return ResponseEntity.ok(adminPostService.getFeaturedPosts());
+    }
 }
