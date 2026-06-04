@@ -57,8 +57,10 @@ public class Post extends BaseEntity {
     private PostStatus status;
     private long viewCount;
     private boolean isDeleted;
+
     private boolean isFeatured;
-    
+    private Integer featuredOrder = 0;
+
     @Override
     public void onCreate() {
         this.status = PostStatus.DRAFT;

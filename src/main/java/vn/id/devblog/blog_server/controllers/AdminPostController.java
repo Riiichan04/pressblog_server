@@ -12,6 +12,8 @@ import vn.id.devblog.blog_server.dto.response.post.PostResponse;
 import vn.id.devblog.blog_server.services.AdminPostService;
 import vn.id.devblog.blog_server.services.PostService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin/posts")
 @RequiredArgsConstructor
@@ -76,5 +78,15 @@ public class AdminPostController {
     public ResponseEntity<GetPostResponse> getAdminPostBySlug(@PathVariable String slug) {
         GetPostResponse response = postService.getPostBySlug(slug, PostStatus.PENDING);
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/featured/order")
+    @PreAuthorize("hasAuthority('UPDATE_ANY_POST')")
+    public ResponseEntity<?> updateFeaturedOrder(@RequestBody List<Long> orderedPostIds) {
+        boolean result = adminPostService.updateFeaturedPostsOrder(orderedPostIds);
+        if (result) {
+            return ResponseEntity.ok("Update featured post successfully");
+        }
+        return ResponseEntity.badRequest().body("Error when update featured post");
     }
 }

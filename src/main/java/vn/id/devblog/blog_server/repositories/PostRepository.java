@@ -67,4 +67,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findByStatus(PostStatus status, Pageable pageable);
 
     Page<Post> findByIsDeletedFalseAndCategory_Slug(String slug, Pageable pageable);
+
+    List<Post> findByIsFeaturedTrueOrderByFeaturedOrderAsc();
+
+    @Modifying
+    @Query("UPDATE Post p SET p.isFeatured = false, p.featuredOrder = 0 WHERE p.isFeatured = true")
+    void clearAllFeaturedPosts();
 }
