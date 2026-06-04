@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import vn.id.devblog.blog_server.common.enums.CommentStatus;
 
 import java.time.LocalDateTime;
 
@@ -36,11 +37,16 @@ public class Comment extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Comment parent;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'PENDING'")
+    private CommentStatus status = CommentStatus.PENDING;
+
     @Override
     public void onCreate() {
         this.upvote = 0;
         this.downvote = 0;
         this.isDeleted = false;
+        this.status = CommentStatus.PENDING;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }

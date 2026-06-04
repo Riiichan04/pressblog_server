@@ -17,6 +17,7 @@ public final class PermissionConstants {
     public static final String FORCE_DELETE_CATEGORY = "FORCE_DELETE_CATEGORY";
     public static final String RESTORE_CATEGORY = "RESTORE_CATEGORY";
 
+    public static final String APPROVE_COMMENT = "APPROVE_COMMENT";
     public static final String DELETE_ANY_COMMENT = "DELETE_ANY_COMMENT";
     public static final String RESTORE_ANY_COMMENT = "RESTORE_ANY_COMMENT";
 

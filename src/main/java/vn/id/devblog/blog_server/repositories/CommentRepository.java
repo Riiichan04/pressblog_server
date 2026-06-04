@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import vn.id.devblog.blog_server.common.enums.CommentStatus;
 import vn.id.devblog.blog_server.models.Comment;
 
 import java.util.List;
@@ -21,4 +22,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByPostIdAndParentIdIsNullAndIsDeletedFalseOrderByCreatedAtDesc(Long postId, Pageable pageable);
 
     long countByPostIdAndIsDeletedFalse(Long postId);
+
+    Page<Comment> findByPost_Slug(String postSlug, Pageable pageable);
+    Page<Comment> findByStatus(CommentStatus status, Pageable pageable);
+    Page<Comment> findByPost_SlugAndStatus(String postSlug, CommentStatus status, Pageable pageable);
 }

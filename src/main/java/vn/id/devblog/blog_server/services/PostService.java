@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.id.devblog.blog_server.common.constants.PermissionConstants;
 import vn.id.devblog.blog_server.common.constants.RoleConstants;
-import vn.id.devblog.blog_server.common.enums.AppPermission;
 import vn.id.devblog.blog_server.common.enums.PostStatus;
 import vn.id.devblog.blog_server.common.utilities.HtmlCleaner;
 import vn.id.devblog.blog_server.common.utilities.SlugUtils;
