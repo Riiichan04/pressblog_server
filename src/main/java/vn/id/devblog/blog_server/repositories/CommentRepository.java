@@ -2,7 +2,9 @@ package vn.id.devblog.blog_server.repositories;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import vn.id.devblog.blog_server.common.enums.CommentStatus;
 import vn.id.devblog.blog_server.models.Comment;
@@ -23,7 +25,18 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     long countByPostIdAndIsDeletedFalse(Long postId);
 
+
+    //For admin management
+    @EntityGraph(attributePaths = {"author", "post", "parent"})
     Page<Comment> findByPost_Slug(String postSlug, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"author", "post", "parent"})
     Page<Comment> findByStatus(CommentStatus status, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"author", "post", "parent"})
     Page<Comment> findByPost_SlugAndStatus(String postSlug, CommentStatus status, Pageable pageable);
+
+    @Query("SELECT c FROM Comment c")
+    @EntityGraph(attributePaths = {"author", "post", "parent"})
+    Page<Comment> findAllWithDetails(Pageable pageable);
 }

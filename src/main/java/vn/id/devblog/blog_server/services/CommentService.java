@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.id.devblog.blog_server.common.constants.PermissionConstants;
 import vn.id.devblog.blog_server.common.constants.RoleConstants;
+import vn.id.devblog.blog_server.common.enums.PostStatus;
 import vn.id.devblog.blog_server.dto.request.post.CommentRequest;
 import vn.id.devblog.blog_server.dto.response.post.CommentResponse;
 import vn.id.devblog.blog_server.dto.response.post.PostResponse;
@@ -86,7 +87,7 @@ public class CommentService {
 
     public Page<CommentResponse> getCommentByPostId(Long postId, int page, int size) {
         Post post = postRepository.findById(postId).orElse(null);
-        if (post == null || post.isDeleted() || !post.getStatus().name().equals("APPROVED")) {
+        if (post == null || post.isDeleted() || !post.getStatus().equals(PostStatus.PUBLISHED)) {
             return Page.empty();
         }
 

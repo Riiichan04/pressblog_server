@@ -51,7 +51,7 @@ public class AdminCommentController {
     }
 
     @PutMapping("/{id}/restore")
-    @PreAuthorize("hasAuthority('UPDATE_ANY_COMMENT')")
+    @PreAuthorize("hasAuthority('RESTORE_ANY_COMMENT')")
     public ResponseEntity<String> restoreComment(@PathVariable Long id) {
         boolean result = adminCommentService.restoreComment(id);
         if (result) {

@@ -10,8 +10,11 @@ public record AdminCommentResponse(
         String authorName,
         Long postId,
         String postName,
+        String postSlug,
         boolean isDeleted,
         LocalDateTime createdAt,
-        CommentStatus status
+        CommentStatus status,
+        Long parentId,
+        String parentContent
 ) {
 }

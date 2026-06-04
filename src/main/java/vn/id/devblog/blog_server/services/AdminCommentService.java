@@ -24,7 +24,6 @@ public class AdminCommentService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Comment> comments;
 
-        // Rẽ nhánh logic kết hợp Lọc theo Bài viết & Lọc theo Trạng thái
         if (postSlug != null && !postSlug.isEmpty()) {
             if (status != null) {
                 comments = commentRepository.findByPost_SlugAndStatus(postSlug, status, pageable);
@@ -35,7 +34,7 @@ public class AdminCommentService {
             if (status != null) {
                 comments = commentRepository.findByStatus(status, pageable);
             } else {
-                comments = commentRepository.findAll(pageable);
+                comments = commentRepository.findAllWithDetails(pageable);
             }
         }
 
@@ -45,9 +44,12 @@ public class AdminCommentService {
                 comment.getAuthor() != null ? comment.getAuthor().getDisplayName() : "Anonymous",
                 comment.getPost() != null ? comment.getPost().getId() : -1,
                 comment.getPost() != null ? comment.getPost().getName() : "Blog deleted",
+                comment.getPost() != null ? comment.getPost().getSlug() : null,
                 comment.isDeleted(),
                 comment.getCreatedAt(),
-                comment.getStatus()
+                comment.getStatus(),
+                comment.getParent() != null ? comment.getParent().getId() : null,
+                comment.getParent() != null ? comment.getParent().getContent() : null
         ));
     }
 
