@@ -85,6 +85,12 @@ public class AuthService {
         return new AuthResponse(true, "register_success", null);
     }
 
+    public AuthDto getAuthDtoByUsername(String username) {
+        User targetUser = this.userRepository.findByUsername(username);
+        if (targetUser == null) {return null;}
+        return getAuthDto(targetUser, null);
+    }
+
     private static AuthDto getAuthDto(User targetUser, String jwtToken) {
         AuthDto dto = new AuthDto();
         dto.setId(targetUser.getId());
