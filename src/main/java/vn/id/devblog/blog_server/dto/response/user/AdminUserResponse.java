@@ -8,8 +8,8 @@ public record AdminUserResponse(
         String email,
         String displayName,
         String roleName,
-        boolean isActive,
-        boolean isVerified,
+        boolean active,
+        boolean verified,
         LocalDateTime createdAt,
         String avatarUrl
 ) {
