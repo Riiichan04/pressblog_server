@@ -49,6 +49,8 @@ public class SecurityConfig {
                         //For home and landing page
                         .requestMatchers("/api/v1/newest/**").permitAll()
                         .requestMatchers("/api/v1/featured/**").permitAll()
+                        .requestMatchers("/api/v1/trending-tags/**").permitAll()
+                        .requestMatchers("/api/v1/featured-authors/**").permitAll()
 
                         .anyRequest().authenticated()
                 )

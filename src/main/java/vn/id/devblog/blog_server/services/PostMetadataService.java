@@ -39,4 +39,7 @@ public class PostMetadataService {
         return tagRepository.getByNameLike(name);
     }
 
+    public List<String> getTrendingTags() {
+        return tagRepository.findTrendingTags(PageRequest.of(0, 10));
+    }
 }

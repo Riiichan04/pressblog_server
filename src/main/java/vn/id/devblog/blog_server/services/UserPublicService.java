@@ -8,11 +8,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import vn.id.devblog.blog_server.common.enums.PostStatus;
 import vn.id.devblog.blog_server.dto.response.post.PublicPostResponse;
+import vn.id.devblog.blog_server.dto.response.user.AuthorStatsDto;
 import vn.id.devblog.blog_server.dto.response.user.PublicUserProfileResponse;
 import vn.id.devblog.blog_server.models.Post;
 import vn.id.devblog.blog_server.models.User;
 import vn.id.devblog.blog_server.repositories.PostRepository;
 import vn.id.devblog.blog_server.repositories.UserRepository;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -48,5 +51,9 @@ public class UserPublicService {
                 post.getCreatedAt(),
                 post.getUpdatedAt()
         ));
+    }
+
+    public List<AuthorStatsDto> getFeaturedAuthors() {
+        return userRepository.findFeaturedAuthors(PageRequest.of(0, 5));
     }
 }
