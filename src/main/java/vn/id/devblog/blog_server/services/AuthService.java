@@ -2,7 +2,7 @@ package vn.id.devblog.blog_server.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +21,8 @@ import vn.id.devblog.blog_server.security.JwtConfig;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -31,6 +33,7 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final JwtConfig jwtConfig;
     private final PasswordEncoder passwordEncoder;
+    private final StringRedisTemplate redisTemplate;
 
     public AuthResponse login(LoginRequest input) {
         User targetUser = userRepository.findByEmail(input.email());
@@ -43,15 +46,20 @@ public class AuthService {
             return new AuthResponse(false, "Wrong password or email", null);
         }
 
-        Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("userId", targetUser.getId());
-        if (targetUser.getRole() != null) {
-            extraClaims.put("userRole", targetUser.getRole().getName());
-        }
+        String jwtToken = extractJwtToken(targetUser);
 
-        String jwtToken = jwtConfig.generateToken(extraClaims, targetUser);
+        String refreshToken = UUID.randomUUID().toString();
+
+        redisTemplate.opsForValue().set(
+                "RT:" + refreshToken,
+                targetUser.getUsername(),
+                7,
+                TimeUnit.DAYS
+        );
 
         AuthDto dto = getAuthDto(targetUser, jwtToken);
+        dto.setRefreshToken(refreshToken);
+
         return new AuthResponse(true, "Login success!", dto);
     }
 
@@ -83,6 +91,65 @@ public class AuthService {
         this.userRepository.save(newUser);
 
         return new AuthResponse(true, "register_success", null);
+    }
+
+    @Transactional
+    public AuthResponse refreshAccessToken(String oldRefreshToken) {
+        if (oldRefreshToken == null || oldRefreshToken.isBlank()) {
+            return new AuthResponse(false, "Refresh token is missing", null);
+        }
+
+        String redisKey = "RT:" + oldRefreshToken;
+        String username = redisTemplate.opsForValue().get(redisKey);
+
+        if (username == null) {
+            return new AuthResponse(false, "Refresh token is invalid or expired", null);
+        }
+
+        User targetUser = userRepository.findByUsername(username);
+        if (targetUser == null || !targetUser.isActive()) {
+            redisTemplate.delete(redisKey);
+            return new AuthResponse(false, "User not found or inactive", null);
+        }
+
+        redisTemplate.delete(redisKey);
+
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("userId", targetUser.getId());
+        if (targetUser.getRole() != null) {
+            extraClaims.put("userRole", targetUser.getRole().getName());
+        }
+
+        String newJwtToken = jwtConfig.generateToken(extraClaims, targetUser);
+
+        String newRefreshToken = UUID.randomUUID().toString();
+        redisTemplate.opsForValue().set(
+                "RT:" + newRefreshToken,
+                targetUser.getUsername(),
+                7,
+                TimeUnit.DAYS
+        );
+
+        AuthDto dto = getAuthDto(targetUser, newJwtToken);
+        dto.setRefreshToken(newRefreshToken);
+
+        return new AuthResponse(true, "Token refreshed securely", dto);
+    }
+
+    private String extractJwtToken(User targetUser) {
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("userId", targetUser.getId());
+        if (targetUser.getRole() != null) {
+            extraClaims.put("userRole", targetUser.getRole().getName());
+        }
+
+        return  jwtConfig.generateToken(extraClaims, targetUser);
+    }
+
+    public void logout(String refreshToken) {
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            redisTemplate.delete("RT:" + refreshToken);
+        }
     }
 
     public AuthDto getAuthDtoByUsername(String username) {

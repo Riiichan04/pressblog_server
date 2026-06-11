@@ -25,4 +25,5 @@ public class AuthDto {
     private String role;
     private List<String> permissions;
     private String jwtToken;
+    private String refreshToken;
 }
