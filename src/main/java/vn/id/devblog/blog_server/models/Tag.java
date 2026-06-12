@@ -1,5 +1,6 @@
 package vn.id.devblog.blog_server.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,18 +24,24 @@ public class Tag extends BaseEntity {
     @Column(unique = true)
     private String slug;
 
+    //Prevent StackOverflow when repeat Tag and Post
     @ManyToMany(mappedBy = "tags")
+    @JsonIgnore
     private Set<Post> posts = new HashSet<>();
+
+    @Column(name = "is_approved", nullable = false, columnDefinition = "boolean default false")
+    private boolean isApproved = false;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Tag tag)) return false;
-        return id == tag.id && slug.equals(tag.slug) && name.equals(tag.name);
+
+        return name != null && name.equalsIgnoreCase(tag.name);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return name != null ? name.toLowerCase().hashCode() : getClass().hashCode();
     }
 }

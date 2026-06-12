@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import vn.id.devblog.blog_server.common.enums.PostStatus;
 import vn.id.devblog.blog_server.models.Category;
 import vn.id.devblog.blog_server.models.Tag;
 import vn.id.devblog.blog_server.repositories.CategoryRepository;
@@ -40,6 +41,6 @@ public class PostMetadataService {
     }
 
     public List<String> getTrendingTags() {
-        return tagRepository.findTrendingTags(PageRequest.of(0, 10));
+        return tagRepository.findTrendingTags(PageRequest.of(0, 10), PostStatus.PUBLISHED);
     }
 }

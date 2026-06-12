@@ -54,6 +54,6 @@ public class UserPublicService {
     }
 
     public List<AuthorStatsDto> getFeaturedAuthors() {
-        return userRepository.findFeaturedAuthors(PageRequest.of(0, 5));
+        return userRepository.findFeaturedAuthors(PostStatus.PUBLISHED, PageRequest.of(0, 5));
     }
 }

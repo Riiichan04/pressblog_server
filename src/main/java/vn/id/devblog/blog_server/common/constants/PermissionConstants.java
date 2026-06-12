@@ -21,6 +21,10 @@ public final class PermissionConstants {
     public static final String DELETE_ANY_COMMENT = "DELETE_ANY_COMMENT";
     public static final String RESTORE_ANY_COMMENT = "RESTORE_ANY_COMMENT";
 
+    public static final String UPDATE_TAG = "UPDATE_TAG";
+    public static final String DELETE_TAG = "DELETE_TAG";
+    public static final String APPROVE_TAG = "APPROVE_TAG";
+
     public static final String VIEW_USERS = "VIEW_USERS";
     public static final String BAN_USER = "BAN_USER";
     public static final String UPDATE_USER_ROLE = "UPDATE_USER_ROLE";

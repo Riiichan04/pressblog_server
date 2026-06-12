@@ -4,7 +4,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import vn.id.devblog.blog_server.common.enums.PostStatus;
 import vn.id.devblog.blog_server.models.Tag;
 import java.util.List;
 
@@ -16,8 +18,8 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     List<Tag> getByNameLike(String name);
 
     @Query("SELECT t.name FROM Tag t JOIN t.posts p " +
-            "WHERE p.status = 'PUBLISHED' " +
+            "WHERE p.status = :status " +
             "GROUP BY t.id " +
             "ORDER BY COUNT(p.id) DESC")
-    List<String> findTrendingTags(Pageable pageable);
+    List<String> findTrendingTags(Pageable pageable, @Param("status") PostStatus status);
 }
