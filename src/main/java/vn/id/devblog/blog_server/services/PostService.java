@@ -215,7 +215,7 @@ public class PostService {
                 post.getSlug(), post.getContent(),
                 post.getThumbnail(), author,
                 (post.getCategory() != null && !post.getCategory().isDeleted()) ? post.getCategory().getName() : "",
-                post.getTags() != null ? post.getTags().stream().map(Tag::getName).collect(Collectors.toSet()) : new HashSet<>(),
+                post.getTags() != null ? post.getTags().stream().filter(Tag::isApproved).map(Tag::getName).collect(Collectors.toSet()) : new HashSet<>(),
                 post.getStatus(),
                 post.getViewCount(),
                 post.getUpdatedAt(), post.getLanguage(), post.getExcerpt()

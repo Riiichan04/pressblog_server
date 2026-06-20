@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/featured/**").permitAll()
                         .requestMatchers("/api/v1/trending-tags/**").permitAll()
                         .requestMatchers("/api/v1/featured-authors/**").permitAll()
+                        .requestMatchers("/api/v1/auth/refresh/**").permitAll()
 
                         .anyRequest().authenticated()
                 )
